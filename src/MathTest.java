@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class MathTest {
@@ -9,6 +10,8 @@ public class MathTest {
 
 	static {
 		ArrayList<Point2D> points = new ArrayList<>();
+		
+		
 		points.add(new Point2D(15, 3));
 		points.add(new Point2D(6, 3));
 		points.add(new Point2D(5, 3));
@@ -30,6 +33,30 @@ public class MathTest {
 		points.add(new Point2D(25, 4));
 		points.add(new Point2D(23, 3));
 		points.add(new Point2D(22, 3));
+		
+		
+		/**
+		points.add(new Point2D(15, 3));
+		
+		points.add(new Point2D(5, 3));
+		points.add(new Point2D(4, 3));
+		points.add(new Point2D(3, 4));
+		points.add(new Point2D(3, 5));
+		
+		points.add(new Point2D(3, 11));
+		points.add(new Point2D(3, 12));
+		points.add(new Point2D(4, 13));
+		points.add(new Point2D(5, 14));
+		points.add(new Point2D(6, 14));
+		
+		points.add(new Point2D(26, 14));
+		//points.add(new Point2D(27, 14));
+		points.add(new Point2D(27, 13));
+		
+		points.add(new Point2D(27, 4));
+		//points.add(new Point2D(27, 3));
+		points.add(new Point2D(26, 3));
+		**/
 
 		track = new TrackNode[points.size()];
 		for (int i = 0; i < points.size(); i++) {
@@ -38,11 +65,18 @@ public class MathTest {
 			Point2D p2 = points.get((i == points.size() - 1) ? 0 : i + 1);
 
 			double t_ab = getSplitTheta(p0, p1, p2);
+			//double t_ab = getSplitTheta(null, p1, p2);
 			track[i] = new TrackNode(offsetPoint(p1, distance, t_ab), p1, offsetPoint(p1, -distance, t_ab));
 
 			// a = offsetPoint(p1, distance, t_ab);
 			// b = offsetPoint(p1, -distance, t_ab);
 		}
+		
+		System.out.println("-----Nodes-----");
+		for (TrackNode n : track) {
+			System.out.println(n.a + " " + n.p + " " + n.b);
+		}
+		System.out.println("---------------");
 
 	}
 
@@ -62,7 +96,7 @@ public class MathTest {
 		System.out.println();
 
 		Point2D a, b;
-		double t_ab = Math.abs(getSplitTheta(p0, p1, p2));
+		double t_ab = getSplitTheta(p0, p1, p2);
 
 		a = offsetPoint(p1, distance, t_ab);
 		b = offsetPoint(p1, -distance, t_ab);
@@ -89,16 +123,25 @@ public class MathTest {
 		t1 = (pA != null) ? (t1 = Math.atan2(pA.y - pB.y, pA.x - pB.x)) : null;
 		t2 = (pC != null) ? (t2 = Math.atan2(pC.y - pB.y, pC.x - pB.x)) : null;
 
-		t2 = (t2 < 0) ? t2 + (2 * Math.PI) : t2;
-		
-		//System.out.println(Math.toDegrees(t1) + " : " + Math.toDegrees(t2));
-
 		if (t1 != null && t2 != null) {
-			double theta = Math.abs(t1) + Math.abs(t2);
-			return ((theta > Math.PI) ? (2 * Math.PI) - theta : theta) / 2d;
+			double a1 = Math.abs(t1);
+			double a2 = Math.abs(t2);
+			
+			//If the signs are different, they're opposite sides,
+			//so add them instead of substracting.
+			double theta = (t1 * t2 > 0) ? (Math.max(t1, t2) - Math.min(t1, t2)) : (t1 + t2);
+			theta = theta / 2;
+			
+			theta = (t1 < 0) ? Math.PI + theta : theta;
+			
+			//theta = t1 + theta;
+			
+			DecimalFormat df = new DecimalFormat(" ###.00;-###.00");
+			System.out.println(df.format(Math.toDegrees(theta)) + " : " + (a2 > a1));
+			return theta;
 		}
 
-		return (t1 != null) ? t1 : (t2 != null) ? t2 : 0d;
+		return (t1 != null) ? t1  + ninety: (t2 != null) ? t2 + ninety : 0d;
 	}
 
 	/**
@@ -114,8 +157,9 @@ public class MathTest {
 		// System.out.println(Math.toDegrees(theta) + " @ " + distance + " " +
 		// p);
 
-		p2 = new Point2D(Math.round((distance * Math.cos(theta)) * 100d) / 100d + p.x,
-				Math.round((distance * Math.sin(theta)) * 100d) / 100d + p.y);
+		p2 = new Point2D(
+				Math.round(distance * (Math.cos(theta)) * 100d) / 100d + p.x,
+				Math.round(distance * (Math.sin(theta)) * 100d) / 100d + p.y);
 
 		return p2;
 	}
