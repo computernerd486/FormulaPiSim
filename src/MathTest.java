@@ -119,22 +119,26 @@ public class MathTest {
 		// t1 = pA -> pB
 		// t2 = pB -> pC
 		// pB is centerpoint reference
-
+		System.out.println();
+		System.out.println(pA + " " + pB + " " + pC);
+		
 		t1 = (pA != null) ? (t1 = Math.atan2(pA.y - pB.y, pA.x - pB.x)) : null;
 		t2 = (pC != null) ? (t2 = Math.atan2(pC.y - pB.y, pC.x - pB.x)) : null;
 
 		if (t1 != null && t2 != null) {
-			double a1 = Math.abs(t1);
-			double a2 = Math.abs(t2);
+			double a1 = (t1 < 0) ? (2 * Math.PI) + t1 : t1;
+			double a2 = (t2 < 0) ? (2 * Math.PI) + t2 : t2;
+			System.out.println(Math.toDegrees(t1) + " " + Math.toDegrees(t2));
+			System.out.println(Math.toDegrees(a1) + " " + Math.toDegrees(a2) + " " + Math.toDegrees(Math.max(a1, a2) - Math.min(a1, a2)));
 			
 			//If the signs are different, they're opposite sides,
 			//so add them instead of substracting.
-			double theta = (t1 * t2 > 0) ? (Math.max(t1, t2) - Math.min(t1, t2)) : (t1 + t2);
+			double theta = Math.max(a1, a2) - Math.min(a1, a2);
 			theta = theta / 2;
-			
-			theta = (t1 < 0) ? Math.PI + theta : theta;
-			
-			//theta = t1 + theta;
+			System.out.println(": " + Math.toDegrees(theta));
+			theta = (t1 < 0) ? t1 - theta : t1 + theta;
+			System.out.println(": " + Math.toDegrees(theta));
+			theta = (theta < 0) ? theta + Math.PI : theta;
 			
 			DecimalFormat df = new DecimalFormat(" ###.00;-###.00");
 			System.out.println(df.format(Math.toDegrees(theta)) + " : " + (a2 > a1));
