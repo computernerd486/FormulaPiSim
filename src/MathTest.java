@@ -6,7 +6,7 @@ public class MathTest {
 	static final double ninety = Math.toRadians(90d);
 	static final MathTest m = new MathTest();
 	static final TrackNode[] track;
-	static final double distance = 1d;
+	static final double distance = 1.5d;
 
 	static {
 		ArrayList<Point2D> points = new ArrayList<>();
