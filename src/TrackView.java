@@ -1,16 +1,15 @@
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Image;
-import java.awt.Label;
-import java.io.File;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
@@ -18,6 +17,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -34,6 +34,9 @@ public class TrackView extends JFrame {
 	
 	Texture tex_trackRoad;
 	Texture tex_bot;
+
+	Bot bot;
+	BotUpdater botUpdater;
 	
 	public TrackView() {
 	
@@ -57,6 +60,10 @@ public class TrackView extends JFrame {
 				 draw(glautodrawable);
 			}
 		});
+		
+		Animator anim = new Animator(glcanvas);
+		anim.start();
+		
 		glu = new GLU();
 
 
@@ -64,14 +71,62 @@ public class TrackView extends JFrame {
 		this.getContentPane().add(glcanvas, BorderLayout.CENTER);
 		
 		JPanel p = new JPanel();
-		p.add(new Label("Overview:"));
+		p.add(new JLabel("Overview:"));
 		p.setPreferredSize(new Dimension(view_width_firstperson, 100));
+		{
+			SpinnerNumberModel direction = new SpinnerNumberModel(180, 0, 360, 5);
+			JSpinner directionSpinner = new JSpinner(direction);
+					
+			directionSpinner.addChangeListener(new ChangeListener() {
+				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					// TODO Auto-generated method stub
+					bot.setDirection((int)directionSpinner.getValue());
+				}
+			});
+			p.add(directionSpinner);
+		}
 		
+		{
+			SpinnerNumberModel direction = new SpinnerNumberModel(.3, .05, 1, .05);
+			JSpinner heightSpinner = new JSpinner(direction);
+					
+			heightSpinner.addChangeListener(new ChangeListener() {
+				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					// TODO Auto-generated method stub
+					bot.height = (float)(double)heightSpinner.getValue();
+				}
+			});
+			p.add(heightSpinner);
+		}
+		
+		{
+			SpinnerNumberModel direction = new SpinnerNumberModel(0, 0, 100, 1);
+			JSpinner speedSpinner = new JSpinner(direction);
+					
+			speedSpinner.addChangeListener(new ChangeListener() {
+				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					// TODO Auto-generated method stub
+					bot.p_m1 = ((float)(int)speedSpinner.getValue()) / 100;
+					bot.p_m1 = ((float)(int)speedSpinner.getValue()) / 100;
+				}
+			});
+			p.add(speedSpinner);
+		}
+
 		this.getContentPane().add(p, BorderLayout.EAST);
 
+		TrackNode start = MathTest.track[0];
 		
-		//DrawTest(null);
-		//this.add(new ViewPort());
+		bot = new Bot(new Point2D(start.p.x, start.p.y), 180f);
+		botUpdater = new BotUpdater(bot);
+		
+		botUpdater.start();
 	}
 	
 	public void loadTextures(GLAutoDrawable glautodrawable)
@@ -88,8 +143,15 @@ public class TrackView extends JFrame {
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_CLAMP_TO_EDGE);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_CLAMP_TO_EDGE);
-			 
 			 tex_trackRoad = t;
+			 
+			 t = TextureIO.newTexture(this.getClass().getResource("bot.png"), false, ".png");
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_LINEAR);
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_CLAMP_TO_EDGE);
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_CLAMP_TO_EDGE);
+			 tex_bot = t;
+			 
 			 
 		 } catch (Exception e) {
 			 e.printStackTrace(System.err);
@@ -101,26 +163,40 @@ public class TrackView extends JFrame {
 		
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glLineWidth(2);		
+		gl2.glEnable(GL2.GL_SCISSOR_TEST);
 		
 		//Draw the overhead view
 		{
 			gl2.glViewport(glcanvas.getWidth() - view_width_overhead, 0, view_width_overhead, view_height_overhead);
+			gl2.glScissor(glcanvas.getWidth() - view_width_overhead, 0, view_width_overhead, view_height_overhead);
+			gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
 			gl2.glOrtho(0, 30, 0, 20, -1, 1);
 			
 			drawTrack(glautodrawable);
+			drawBot(glautodrawable);
 		}
 		
 		//Draw the First Person/Robot View
 		{
 			gl2.glViewport(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
-			gl2.glLoadIdentity();
+			gl2.glScissor(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			
+			gl2.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			
+			gl2.glLoadIdentity();
+
 			TrackNode start = MathTest.track[0];
 			
 			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.1f, 500.0 );
-			glu.gluLookAt(start.p.x, start.p.y, 1d, start.p.x - 5, start.p.y, 1d, 0d, 0d, 1d);
+			glu.gluLookAt(
+					bot.position.x, bot.position.y, bot.height, 
+					bot.focus.x, bot.focus.y, bot.height, 
+					0d, 0d, 1d);
 			
 			drawFirstPerson(glautodrawable);
 		}
@@ -140,6 +216,7 @@ public class TrackView extends JFrame {
 			tex_trackRoad.bind(gl2);
 		}
 		
+		//track surface
 		gl2.glBegin(GL2.GL_QUAD_STRIP);
 		gl2.glColor3f(1f, 1f, 1f);
 		for (int i = 0; i < trackSize; i++) {
@@ -163,18 +240,86 @@ public class TrackView extends JFrame {
 		if (tex_trackRoad != null)
 			tex_trackRoad.disable(gl2);
 		
+		gl2.glColor3f(.9f, .9f, .9f);
 		
-		gl2.glBegin(GL.GL_LINE_LOOP);
-		gl2.glColor3f(0f, 1f, 0f);
+		//walls inside
+		gl2.glBegin(GL2.GL_QUAD_STRIP);
+		gl2.glColor3f(.2f, .2f, .2f);
 		for (int i = 0; i < trackSize; i++) {
-			Point2D p1 = nodes[i].p;
-			//Point2D p2 = nodes[(i == trackSize - 1) ? 0 : i + 1].p;
+			Point2D p1 = nodes[i].a;
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex3d(p1.x, p1.y, .5f);
+			gl2.glTexCoord2d(0,0);
+			gl2.glVertex2d(p1.x, p1.y);
+		}
+		{
+			Point2D p1 = nodes[0].a;
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex3d(p1.x, p1.y, .5f);
+			gl2.glTexCoord2d(0,0);
 			gl2.glVertex2d(p1.x, p1.y);
 		}
 		gl2.glEnd();
-		 
-		//glautodrawable.swapBuffers();
-
+		
+		//walls outside
+		gl2.glBegin(GL2.GL_QUAD_STRIP);
+		gl2.glColor3f(.2f, .2f, .2f);
+		for (int i = 0; i < trackSize; i++) {
+			Point2D p1 = nodes[i].b;
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex2d(p1.x, p1.y);
+			gl2.glTexCoord2d(0,0);
+			gl2.glVertex3d(p1.x, p1.y, .5f);
+		}
+		{
+			Point2D p1 = nodes[0].b;
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex2d(p1.x, p1.y);
+			gl2.glTexCoord2d(0,0);
+			gl2.glVertex3d(p1.x, p1.y, .5f);
+		}
+		gl2.glEnd();
+		
+	}
+	
+	public void drawBot(GLAutoDrawable glautodrawable)
+	{
+		GL2 gl2 = glautodrawable.getGL().getGL2();
+		
+		if (tex_bot != null)
+		{
+			gl2.glActiveTexture(GL2.GL_TEXTURE0);
+			gl2.glEnable(GL2.GL_BLEND);
+			gl2.glBlendFunc(GL2.GL_ONE, gl2.GL_ONE_MINUS_SRC_ALPHA);
+			tex_bot.enable(gl2);
+			tex_bot.bind(gl2);
+			gl2.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE); 
+		}
+		
+		//move to bot class
+		float width = 1f, height = .75f;
+		
+		gl2.glPushMatrix();
+		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0f);
+		gl2.glRotatef(bot.direction, 0f, 0f, 1f);
+		
+		gl2.glBegin(GL2.GL_QUADS);
+		{
+			gl2.glTexCoord2d(1,1);
+			gl2.glVertex2d(-(width / 2), -(height/2));
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex2d(-(width / 2),  (height/2));
+			gl2.glTexCoord2d(0,0);
+			gl2.glVertex2d( (width / 2),  (height/2));
+			gl2.glTexCoord2d(0,1);
+			gl2.glVertex2d( (width / 2), -(height/2));
+		}
+		gl2.glEnd();
+		gl2.glTranslatef(-(float)bot.position.x, -(float)bot.position.y, 0f);
+		gl2.glPopMatrix();
+		
+		if (tex_bot != null)
+			tex_bot.disable(gl2);
 	}
 	
 	public void drawFirstPerson(GLAutoDrawable glautodrawable)

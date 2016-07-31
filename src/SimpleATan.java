@@ -18,6 +18,14 @@ public class SimpleATan {
 		
 		System.out.println();
 		System.out.println(pE);
+		
+		System.out.println();
+		for (int i = 0; i <= 360; i+=5)
+		{
+			System.out.println(new Point2D(
+					Math.cos(Math.toRadians(i)),
+					Math.sin(Math.toRadians(i))));
+		}
 	}
 
 }
