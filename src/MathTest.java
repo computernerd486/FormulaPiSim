@@ -126,23 +126,8 @@ public class MathTest {
 		t2 = (pC != null) ? (t2 = Math.atan2(pC.y - pB.y, pC.x - pB.x)) : null;
 
 		if (t1 != null && t2 != null) {
-			double a1 = (t1 < 0) ? (2 * Math.PI) + t1 : t1;
-			double a2 = (t2 < 0) ? (2 * Math.PI) + t2 : t2;
-			System.out.println(Math.toDegrees(t1) + " " + Math.toDegrees(t2));
-			System.out.println(Math.toDegrees(a1) + " " + Math.toDegrees(a2) + " " + Math.toDegrees(Math.max(a1, a2) - Math.min(a1, a2)));
-			
-			//If the signs are different, they're opposite sides,
-			//so add them instead of substracting.
-			double theta = Math.max(a1, a2) - Math.min(a1, a2);
-			theta = theta / 2;
-			System.out.println(": " + Math.toDegrees(theta));
-			theta = (t1 < 0) ? t1 - theta : t1 + theta;
-			System.out.println(": " + Math.toDegrees(theta));
-			theta = (theta < 0) ? theta + Math.PI : theta;
-			
-			DecimalFormat df = new DecimalFormat(" ###.00;-###.00");
-			System.out.println(df.format(Math.toDegrees(theta)) + " : " + (a2 > a1));
-			return theta;
+			double delta = ((t2 < 0 ? (2 * Math.PI) + t2 : t2) - t1) / 2;
+			return t1 + ((delta < 0) ? Math.PI + delta : delta);			
 		}
 
 		return (t1 != null) ? t1  + ninety: (t2 != null) ? t2 + ninety : 0d;
