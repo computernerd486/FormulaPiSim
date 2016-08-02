@@ -37,9 +37,12 @@ public class BotView extends JFrame implements KeyListener{
 	
 	Timer aiRoutine;
 	Point2D target;
+	Texture view;
 	
 	public float step_speed = .05f; //5 percent increase
 	public float step_angle = 5f;	
+	
+	boolean running = false;
 	
 	public BotView(){
 		GLCapabilities capabilities = new GLCapabilities(GLProfile.getDefault());
@@ -93,7 +96,7 @@ public class BotView extends JFrame implements KeyListener{
 		
 		if (camera != null)
 		{
-			Texture view = AWTTextureIO.newTexture(gl2.getGLProfile(), camera, false);
+			view = AWTTextureIO.newTexture(gl2.getGLProfile(), camera, false);
 			camera_width = camera.getWidth();
 			camera_height = camera.getHeight();
 
@@ -134,38 +137,7 @@ public class BotView extends JFrame implements KeyListener{
 			gl2.glPopMatrix();
 			
 		}
-		
-		/**
-		if (processed != null)
-		{
-			Texture view = AWTTextureIO.newTexture(gl2.getGLProfile(), processed, false);
-			camera_width = camera.getWidth();
-			camera_height = camera.getHeight();
-			
-			gl2.glActiveTexture(GL2.GL_TEXTURE0);
-			view.enable(gl2);
-			view.bind(gl2);
-			
-			gl2.glPushMatrix();
-			gl2.glTranslatef(0, height - camera_height, 0f);
-			
-			gl2.glBegin(GL2.GL_QUADS);
-			{
-				gl2.glTexCoord2d(0,0);
-				gl2.glVertex2d(0,0);
-				gl2.glTexCoord2d(0,1);
-				gl2.glVertex2d(0, camera_height);
-				gl2.glTexCoord2d(1,1);
-				gl2.glVertex2d(camera_width, camera_height);
-				gl2.glTexCoord2d(1,0);
-				gl2.glVertex2d(camera_width, 0);
-			}
-			gl2.glEnd();
-			
-			view.disable(gl2);
-		}
-		**/
-		
+
 		tr.beginRendering(width, height);
 		tr.setColor(1f, 1f, 1f, 1f);
 		tr.draw("Motor 1: " + (int)(bot.p_m1 * 100) + "%", 20, 100);
@@ -199,6 +171,7 @@ public class BotView extends JFrame implements KeyListener{
 			case KeyEvent.VK_RIGHT: bot.direction -= step_angle; break;
 			case KeyEvent.VK_UP: bot.p_m1 = Math.min(bot.p_m1 + step_speed, 1f); break;
 			case KeyEvent.VK_DOWN: bot.p_m1 = Math.max(bot.p_m1 - step_speed, -1f); break;
+			case KeyEvent.VK_ENTER: running = !running; break;
 			}
 		}
 	}
@@ -212,7 +185,7 @@ public class BotView extends JFrame implements KeyListener{
 			
 			public void run() {
 				
-				if (camera != null)
+				if (camera != null && running)
 				{
 					int lineNum = (int)(camera.getHeight() * .25f);
 					int[] rgbData = camera.getRGB(0, lineNum, camera_width, 1, null, 0, camera_width).clone();
@@ -251,7 +224,7 @@ public class BotView extends JFrame implements KeyListener{
 					int half = camera_width / 2;
 					int diff = (int) (half - target.x);
 					
-					int max_deviation = 20;
+					int max_deviation = 25;
 					float fix_percent =  diff/max_deviation;
 					float fix = (int) (Math.min(1f, fix_percent) * max_fix);
 					
@@ -259,14 +232,14 @@ public class BotView extends JFrame implements KeyListener{
 					
 					
 					float max_speed_change = -.15f;
-					float speed_diff = Math.max(-.1f, Math.min(.05f, (1 - fix_percent) * 2)) / .1f;
+					float speed_diff = Math.max(-.05f, Math.min(.02f, (1 - fix_percent) * 2)) / .1f;
 					
 					float speed_change = speed_diff * max_speed_change;
-					bot.p_m1 = Math.min(Math.max(bot.p_m1 - speed_change, -.9f), .9f);
+					bot.p_m1 = Math.min(Math.max(bot.p_m1 - speed_change, -1f), 1f);
 					
 				}				
 			}
-		}, 0, 100);
+		}, 0, 32);
 	}
 		
 }

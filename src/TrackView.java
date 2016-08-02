@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +38,9 @@ public class TrackView extends JFrame {
 	int view_width_overhead = 800, view_height_overhead = 600;
 	int view_width_firstperson = 400, view_height_firstperson = 300;
 	
+	private static final String fn_tex_track = "track_v2.png";
+	private static final String fn_tex_bot = "bot.png";
+	
 	//Texture Section, this should be in a loader
 	Texture tex_trackRoad;
 	Texture tex_bot;
@@ -51,6 +55,7 @@ public class TrackView extends JFrame {
 	public TrackView() {
 	
 		botView = new BufferedImage(view_width_firstperson, view_height_firstperson, BufferedImage.TYPE_INT_RGB);
+		
 		
 		GLCapabilities capabilities = new GLCapabilities(GLProfile.getDefault());
 		glcanvas = new GLCanvas(capabilities);
@@ -137,7 +142,6 @@ public class TrackView extends JFrame {
 		
 		bot = new Bot(new Point2D(start.p.x, start.p.y), 180f);
 		botUpdater = new BotUpdater(bot);
-		
 		botUpdater.start();
 	}
 	
@@ -150,14 +154,14 @@ public class TrackView extends JFrame {
 		
 		 try {
 			 Texture t;
-			 t = TextureIO.newTexture(this.getClass().getResource("track_v2.png"), false, ".png");
+			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_track), false, ".png");
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_LINEAR);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_REPEAT);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_REPEAT);
 			 tex_trackRoad = t;
 			 
-			 t = TextureIO.newTexture(this.getClass().getResource("bot.png"), false, ".png");
+			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_bot), false, ".png");
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_LINEAR);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_CLAMP_TO_EDGE);
@@ -211,17 +215,15 @@ public class TrackView extends JFrame {
 			
 			drawFirstPerson(glautodrawable);
 			
-			
 			{
-				Graphics graphics = botView.getGraphics();
-				ByteBuffer buffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);				
-				gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, buffer);
+				//IntBuffer botViewBuffer = GLBuffers.newDirectIntBuffer(view_width_firstperson * view_height_firstperson);
+				ByteBuffer botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
+				gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, botViewBuffer);
 				
-				
-				for (int h = 0; h < view_height_firstperson; h++) {
-	                for (int w = 0; w < view_width_firstperson; w++) {
-	                    graphics.setColor(new Color((buffer.get()*2), (buffer.get()*2), (buffer.get()*2)));
-	                    graphics.drawRect(w, h, 1, 1);
+				for (int y = 0; y < view_height_firstperson; y++) {
+	                for (int x = 0; x < view_width_firstperson; x++) {
+	                	botView.setRGB(x, y, ((botViewBuffer.get()*2) << 16) | ((botViewBuffer.get()*2) << 8) | (botViewBuffer.get()*2));
+	                	//System.arraycopy(botViewBuffer, 0, botView.get, , length);
 	                }
 	            }
 			}
