@@ -20,7 +20,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
-public class BotView extends JFrame implements KeyListener{
+public class BotView extends JFrame implements KeyListener {
 
 	int width = 400, height = 500;
 	int camera_width = 0, camera_height = 0;
@@ -89,6 +89,7 @@ public class BotView extends JFrame implements KeyListener{
 		gl2.glViewport(0, 0, width, height);
 		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+		gl2.glColor3f(1f, 1f, 1f);
 		
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
@@ -122,7 +123,7 @@ public class BotView extends JFrame implements KeyListener{
 			gl2.glEnd();
 			
 			view.disable(gl2);
-			
+			view.destroy(gl2);
 			
 			gl2.glColor3f(1f, 1f, 0.2f);
 			gl2.glPointSize(10);
@@ -143,6 +144,7 @@ public class BotView extends JFrame implements KeyListener{
 		tr.draw("Motor 1: " + (int)(bot.p_m1 * 100) + "%", 20, 100);
 		tr.draw("Target: " + target, 20, 75);
 		tr.endRendering();
+		
 		
 	}
 	

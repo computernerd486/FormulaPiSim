@@ -34,30 +34,6 @@ public class MathTest {
 		points.add(new Point2D(23, 3));
 		points.add(new Point2D(22, 3));
 		
-		
-		/**
-		points.add(new Point2D(15, 3));
-		
-		points.add(new Point2D(5, 3));
-		points.add(new Point2D(4, 3));
-		points.add(new Point2D(3, 4));
-		points.add(new Point2D(3, 5));
-		
-		points.add(new Point2D(3, 11));
-		points.add(new Point2D(3, 12));
-		points.add(new Point2D(4, 13));
-		points.add(new Point2D(5, 14));
-		points.add(new Point2D(6, 14));
-		
-		points.add(new Point2D(26, 14));
-		//points.add(new Point2D(27, 14));
-		points.add(new Point2D(27, 13));
-		
-		points.add(new Point2D(27, 4));
-		//points.add(new Point2D(27, 3));
-		points.add(new Point2D(26, 3));
-		**/
-
 		track = new TrackNode[points.size()];
 		for (int i = 0; i < points.size(); i++) {
 			Point2D p0 = points.get((i == 0) ? points.size() - 1 : i - 1);
