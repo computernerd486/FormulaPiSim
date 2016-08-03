@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class Track {
@@ -13,15 +18,50 @@ public class Track {
 	String filename;
 	Float radius;
 	
-	public Track(){}
+	public Track(){
+		nodes = new TrackNode[0];
+		wallHeight = 0f;
+		radius = 0f;
+	}
 	
 	public void load(String file){
 		
 		ArrayList<Point2D> points = new ArrayList<>();
-		//Read radius and wall height
 		
+		Path p = Paths.get("tracks/", file);
+		System.out.println("Loading File: [" + p.toUri() + "]");
 		
-		//read nodes
+		//Read the custom track file
+		try (BufferedReader reader = Files.newBufferedReader(Paths.get("tracks/", file))) {
+			
+			String line;
+			while ((line = reader.readLine()) != null) {
+				
+				if (line.startsWith("#") || "".equals(line.trim())) continue;
+				
+				//Check if its the config/width/height line
+				if (line.startsWith("WIDTH:")) {
+					radius = Float.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+				
+				if (line.startsWith("HEIGHT:")) {
+					wallHeight = Float.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+				
+				if (line.matches("^[a-zA-Z](.*)"))
+					continue;
+				
+				String[] coord = line.split(",");
+				points.add(new Point2D(Double.valueOf(coord[0]), Double.valueOf(coord[1])));
+			}
+			
+			
+		} catch (Exception e) {
+			System.err.println("Error loading file [" + file + "]:");
+			System.err.println(e);
+		} 
 		
 		
 		//Do math generation
@@ -32,12 +72,39 @@ public class Track {
 			Point2D p2 = points.get((i == points.size() - 1) ? 0 : i + 1);
 
 			double t_ab = getSplitTheta(p0, p1, p2);
-			//double t_ab = getSplitTheta(null, p1, p2);
 			nodes[i] = new TrackNode(offsetPoint(p1, radius, t_ab), p1, offsetPoint(p1, -radius, t_ab));
-
-			// a = offsetPoint(p1, distance, t_ab);
-			// b = offsetPoint(p1, -distance, t_ab);
 		}
+	}
+	
+	/**
+	 * Saves the track out to a file
+	 * @param file
+	 */
+	public void save(String file){
+		
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("tracks/", file))) {
+			
+			System.out.println("Writing out file: [" + file + "]");
+			
+			writer.write("WIDTH:" + radius); 
+			writer.newLine();
+			writer.write("HEIGHT:" + wallHeight);
+			writer.newLine();
+			writer.write("BOUNDS:");
+			writer.newLine();
+			
+			for (TrackNode node : nodes) {
+				System.out.println(node.p);
+				writer.write(node.p.x + "," + node.p.y);
+				writer.newLine();
+			}
+			
+			writer.close();
+		} catch (Exception e) {
+			System.err.println("Error saving file:");
+			System.err.println(e);
+		} 
+		
 	}
 	
 	/**
@@ -54,7 +121,7 @@ public class Track {
 		// t2 = pB -> pC
 		// pB is centerpoint reference
 
-		//System.out.println(pA + " " + pB + " " + pC);
+		System.out.println(pA + " " + pB + " " + pC);
 		
 		t1 = (pA != null) ? (t1 = Math.atan2(pA.y - pB.y, pA.x - pB.x)) : null;
 		t2 = (pC != null) ? (t2 = Math.atan2(pC.y - pB.y, pC.x - pB.x)) : null;

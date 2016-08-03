@@ -41,8 +41,8 @@ public class TrackView extends JFrame {
 	int view_width_overhead = 800, view_height_overhead = 600;
 	int view_width_firstperson = 400, view_height_firstperson = 300;
 	
-	private static final String fn_tex_track = "track_v2.png";
-	private static final String fn_tex_bot = "bot.png";
+	private static final String fn_tex_track = "img/track_v2.png";
+	private static final String fn_tex_bot = "img/bot.png";
 	
 	private static final float wall_height = 0.5f;
 	
