@@ -63,7 +63,7 @@ public class TrackDesigner extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				track.load("default.trk");
+				track.load("final.trk");
 				view.setupTrack();
 				designer.getContentPane().repaint();
 			}

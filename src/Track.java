@@ -13,6 +13,7 @@ public class Track {
 	//Public variable for drawing
 	public TrackNode[] nodes;
 	public Float wallHeight;
+	public Point2D bounds;
 
 	//Private for internal processesing
 	String filename;
@@ -47,6 +48,12 @@ public class Track {
 				
 				if (line.startsWith("HEIGHT:")) {
 					wallHeight = Float.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+				
+				if (line.startsWith("BOUNDS:")) {
+					String[] b = line.substring(line.indexOf(':') + 1).split(",");
+					bounds = new Point2D(Double.valueOf(b[0]), Double.valueOf(b[1]));
 					continue;
 				}
 				
@@ -94,7 +101,7 @@ public class Track {
 			writer.newLine();
 			
 			for (TrackNode node : nodes) {
-				System.out.println(node.p);
+				//System.out.println(node.p);
 				writer.write(node.p.x + "," + node.p.y);
 				writer.newLine();
 			}
@@ -121,14 +128,14 @@ public class Track {
 		// t2 = pB -> pC
 		// pB is centerpoint reference
 
-		System.out.println(pA + " " + pB + " " + pC);
+		//System.out.println(pA + " " + pB + " " + pC);
 		
 		t1 = (pA != null) ? (t1 = Math.atan2(pA.y - pB.y, pA.x - pB.x)) : null;
 		t2 = (pC != null) ? (t2 = Math.atan2(pC.y - pB.y, pC.x - pB.x)) : null;
 
 		if (t1 != null && t2 != null) {
 			double delta = ((t2 < 0 ? twoPi + t2 : t2) - t1) / 2;
-			return t1 + ((delta < 0) ? Math.PI + delta : delta);			
+			return t1 + ((delta < 0) ? (Math.PI + delta) : (delta > Math.PI) ? (delta - Math.PI) : delta);			
 		}
 
 		return (t1 != null) ? t1  + ninety: (t2 != null) ? t2 + ninety : 0d;

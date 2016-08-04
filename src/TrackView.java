@@ -41,8 +41,10 @@ public class TrackView extends JFrame {
 	int view_width_overhead = 800, view_height_overhead = 600;
 	int view_width_firstperson = 400, view_height_firstperson = 300;
 	
-	private static final String fn_tex_track = "img/track_v2.png";
+	private static final String fn_tex_track = "img/track_v3.png";
 	private static final String fn_tex_bot = "img/bot.png";
+	
+	private static final String track_default = "final.trk";
 	
 	private static final float wall_height = 0.5f;
 	
@@ -53,6 +55,7 @@ public class TrackView extends JFrame {
 	//Bot
 	public Bot bot;
 	BotUpdater botUpdater;
+	Track track;
 	
 	//This is for output
 	public BufferedImage botView;
@@ -156,8 +159,11 @@ public class TrackView extends JFrame {
 
 		this.getContentPane().add(p, BorderLayout.EAST);
 
-		TrackNode start = MathTest.track[0];
-
+		track = new Track();
+		track.load(track_default);
+		
+		TrackNode start = track.nodes[0];
+		
 		bot = new Bot(new Point2D(start.p.x, start.p.y), 180f);
 		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
@@ -174,9 +180,9 @@ public class TrackView extends JFrame {
 		
 		 try {
 			 Texture t;
-			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_track), false, ".png");
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_LINEAR);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
+			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_track), true, ".png");
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_NEAREST);
+			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_NEAREST);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_REPEAT);
 			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_REPEAT);
 			 tex_trackRoad = t;
@@ -211,7 +217,7 @@ public class TrackView extends JFrame {
 			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
-			gl2.glOrtho(0, 30, 0, 20, -1, 1);
+			gl2.glOrtho(0, track.bounds.x, 0, track.bounds.y, -1, 1);
 			
 			drawTrack(glautodrawable);
 			drawBot(glautodrawable);
@@ -228,10 +234,10 @@ public class TrackView extends JFrame {
 			gl2.glLoadIdentity();
 
 			
-			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.1f, 500.0 );
+			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.01f, 2000.0 );
 			glu.gluLookAt(
 					bot.position.x, bot.position.y, bot.height, 
-					bot.focus.x, bot.focus.y, bot.height, 
+					bot.focus.x, bot.focus.y, bot.focus.z, 
 					0d, 0d, 1d);
 			
 			drawFirstPerson(glautodrawable);
@@ -268,8 +274,8 @@ public class TrackView extends JFrame {
 	public void prepTrackBuffers(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
-		int nNodes = MathTest.track.length;
-		TrackNode[] nodes = MathTest.track;
+		int nNodes = track.nodes.length;
+		TrackNode[] nodes = track.nodes;
 		
 		FloatBuffer vTrack = GLBuffers.newDirectFloatBuffer((nNodes + 1) * 2 * 2);
 		FloatBuffer cTrack = GLBuffers.newDirectFloatBuffer((nNodes + 1) * 2 * 2);
@@ -277,25 +283,25 @@ public class TrackView extends JFrame {
 		FloatBuffer vInnerWall = GLBuffers.newDirectFloatBuffer((nNodes + 1) * 3 * 2);
 		FloatBuffer vOuterWall = GLBuffers.newDirectFloatBuffer((nNodes + 1) * 3 * 2);
 		
-		for (TrackNode tn : MathTest.track) {
-			vInnerWall.put((float)tn.a.x).put((float)tn.a.y).put(wall_height);
+		for (TrackNode tn : nodes) {
+			vInnerWall.put((float)tn.a.x).put((float)tn.a.y).put(track.wallHeight);
 			vInnerWall.put((float)tn.a.x).put((float)tn.a.y).put(0f);
 			
 			vTrack.put((float)tn.a.x).put((float)tn.a.y);
 			vTrack.put((float)tn.b.x).put((float)tn.b.y);
 			
 			vOuterWall.put((float)tn.b.x).put((float)tn.b.y).put(0f);
-			vOuterWall.put((float)tn.b.x).put((float)tn.b.y).put(wall_height);
+			vOuterWall.put((float)tn.b.x).put((float)tn.b.y).put(track.wallHeight);
 		}
 		
-		vInnerWall.put((float)nodes[0].a.x).put((float)nodes[0].a.y).put(wall_height);
+		vInnerWall.put((float)nodes[0].a.x).put((float)nodes[0].a.y).put(track.wallHeight);
 		vInnerWall.put((float)nodes[0].a.x).put((float)nodes[0].a.y).put(0f);
 		
 		vTrack.put((float)nodes[0].a.x).put((float)nodes[0].a.y);
 		vTrack.put((float)nodes[0].b.x).put((float)nodes[0].b.y);
 		
 		vOuterWall.put((float)nodes[0].b.x).put((float)nodes[0].b.y).put(0f);
-		vOuterWall.put((float)nodes[0].b.x).put((float)nodes[0].b.y).put(wall_height);
+		vOuterWall.put((float)nodes[0].b.x).put((float)nodes[0].b.y).put(track.wallHeight);
 		
 		vInnerWall.flip();
 		vTrack.flip();
@@ -324,7 +330,7 @@ public class TrackView extends JFrame {
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		
-		TrackNode[] nodes = MathTest.track;
+		TrackNode[] nodes = track.nodes;
 		int drawCount = (nodes.length + 1) * 2;
 		
 		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
@@ -377,7 +383,7 @@ public class TrackView extends JFrame {
 		}
 		
 		//move to bot class
-		float width = 1f, height = .75f;
+		float width = (float)bot.dimensions.x, height = (float)bot.dimensions.y;
 		
 		gl2.glPushMatrix();
 		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0f);

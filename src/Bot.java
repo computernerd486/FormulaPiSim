@@ -1,14 +1,16 @@
 
 public class Bot {
 
+	public Point2D dimensions;
 	public Point2D position;
-	public Point2D focus;
+	public Point3D focus;
 	public float height;
 	
 	public float direction;
 	public float speed;
 	
 	float p_m1, p_m2;
+	
 	
 	public Bot()
 	{
@@ -23,9 +25,10 @@ public class Bot {
 	
 	public Bot(Point2D start, float angle)
 	{
+		this.dimensions = new Point2D(19, 18);
 		this.position = start;
-		this.height = .3f;
-		this.speed = .1f;
+		this.height = 4.15f;
+		this.speed = 2f;
 		this.p_m1 = 0f;
 		this.p_m2 = 0f;
 		
@@ -35,9 +38,10 @@ public class Bot {
 	public void setDirection(float angle)
 	{
 		this.direction = angle; //(float) Math.toRadians(angle);
-		this.focus = new Point2D(
-				Math.cos(Math.toRadians(angle)) + position.x,
-				Math.sin(Math.toRadians(angle)) + position.y);
+		this.focus = new Point3D(
+				(Math.cos(Math.toRadians(angle)) * 10d) + position.x,
+				(Math.sin(Math.toRadians(angle)) * 10d) + position.y,
+				(double)(height - 0.2f));
 		
 		//System.out.println("Positon " + position);
 		//System.out.println("Angle   " + direction);
@@ -66,5 +70,9 @@ public class Bot {
 		setDirection(direction);
 		
 		
+	}
+	
+	public void loadConfig(String file){
+		//TODO: Load from config file
 	}
 }
