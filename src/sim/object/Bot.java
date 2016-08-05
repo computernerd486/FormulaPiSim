@@ -1,3 +1,6 @@
+package sim.object;
+
+import sim.util.*;
 
 public class Bot {
 
@@ -9,7 +12,7 @@ public class Bot {
 	public float direction;
 	public float speed;
 	
-	float p_m1, p_m2;
+	public float p_m1, p_m2;
 	
 	
 	public Bot()

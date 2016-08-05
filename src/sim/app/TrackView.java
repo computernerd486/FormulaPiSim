@@ -1,20 +1,18 @@
+package sim.app;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -29,24 +27,43 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
+import sim.object.*;
+import sim.util.*;
+import sim.util.io.stream.*;
+
+/**
+ * TrackView
+ * 
+ * This is the heavy lifting class of this project, it is an extension of a JFrame
+ * which has an opengl displays and a JPanel area for settings.
+ * 
+ * The OpenGL output is making use of JOGL bindings, and displays two views.
+ * One is an overhead view of the track, the other is the first person perspective
+ * from the bot.
+ * 
+ * @author Tim Pearce
+ *
+ */
 public class TrackView extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	
+	//OpenGL objects
 	Animator anim;
 	GLCanvas glcanvas;
 	GLU glu;
 	
+	//Easy access size definitions for the main breaks of the screen
 	int width = 1280, height = 800;
+	int settings_width = 200;
 	int view_width_overhead = 800, view_height_overhead = 600;
 	int view_width_firstperson = 400, view_height_firstperson = 300;
 	
+	//These probably should be loaded out of a config file, but
+	//hard codes win here for now.
 	private static final String fn_tex_track = "img/track_v3.png";
 	private static final String fn_tex_bot = "img/bot.png";
-	
 	private static final String track_default = "final.trk";
-	
-	private static final float wall_height = 0.5f;
 	
 	//Texture Section, this should be in a loader
 	Texture tex_trackRoad;
@@ -60,17 +77,18 @@ public class TrackView extends JFrame {
 	//This is for output
 	public BufferedImage botView;
 	
-	/** Vertex and Coordinate Buffers **/
+	//Vertex and Coordinate Buffers
 	FloatBuffer vertices_track;
 	FloatBuffer texCoords_track;
 	
 	FloatBuffer vertices_innerwall;
 	FloatBuffer vertices_outerwall;
 	
-	//FloatBuffer colors_wall;
-	//float[] wall_rgb = {.1f, .1f, .1f};
-	
+	//Counter variable, use to control how often the fps is printed
 	int framecounter = 0;
+	
+	//IO for video and motor control
+	VideoStreamer videoStream;
 	
 	public TrackView() {
 	
@@ -86,7 +104,7 @@ public class TrackView extends JFrame {
 			@Override
 			public void init(GLAutoDrawable glautodrawable ) {
 				loadTextures(glautodrawable);
-				prepTrackBuffers(glautodrawable);
+				prepTrackBuffers();
 			}
 			
 			@Override
@@ -110,53 +128,7 @@ public class TrackView extends JFrame {
 		
 		JPanel p = new JPanel();
 		p.add(new JLabel("Overview:"));
-		p.setPreferredSize(new Dimension(view_width_firstperson, 100));
-		{
-			SpinnerNumberModel direction = new SpinnerNumberModel(180, 0, 360, 5);
-			JSpinner directionSpinner = new JSpinner(direction);
-					
-			directionSpinner.addChangeListener(new ChangeListener() {
-				
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					// TODO Auto-generated method stub
-					bot.setDirection((int)directionSpinner.getValue());
-				}
-			});
-			p.add(directionSpinner);
-		}
-		
-		{
-			SpinnerNumberModel direction = new SpinnerNumberModel(.3, .05, 1, .05);
-			JSpinner heightSpinner = new JSpinner(direction);
-					
-			heightSpinner.addChangeListener(new ChangeListener() {
-				
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					// TODO Auto-generated method stub
-					bot.height = (float)(double)heightSpinner.getValue();
-				}
-			});
-			p.add(heightSpinner);
-		}
-		
-		{
-			SpinnerNumberModel direction = new SpinnerNumberModel(0, 0, 100, 1);
-			JSpinner speedSpinner = new JSpinner(direction);
-					
-			speedSpinner.addChangeListener(new ChangeListener() {
-				
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					// TODO Auto-generated method stub
-					bot.p_m1 = ((float)(int)speedSpinner.getValue()) / 100;
-					bot.p_m1 = ((float)(int)speedSpinner.getValue()) / 100;
-				}
-			});
-			p.add(speedSpinner);
-		}
-
+		p.setPreferredSize(new Dimension(settings_width, 100));
 		this.getContentPane().add(p, BorderLayout.EAST);
 
 		track = new Track();
@@ -169,6 +141,50 @@ public class TrackView extends JFrame {
 		botUpdater.start();
 		
 		
+		try {
+			videoStream = new StaticImageStreamer(10);
+			((StaticImageStreamer)videoStream).setupStaticStreamer("io/video.png");
+			videoStream.video = botView;
+			videoStream.run();
+			
+		} catch (Exception e) {
+			videoStream = null;
+			System.err.println("Unable to setup video streamer");
+			e.printStackTrace(System.err);
+		}
+		
+		this.addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
+			
+			//Tear it down! Clenaup everything
+			@Override
+			public void windowClosing(WindowEvent e) {
+				tearDown();
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {}
+		});
+	}
+	
+	private void tearDown()
+	{
+		if (videoStream != null)
+			videoStream.stop();
 	}
 	
 	public void loadTextures(GLAutoDrawable glautodrawable)
@@ -180,18 +196,26 @@ public class TrackView extends JFrame {
 		
 		 try {
 			 Texture t;
-			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_track), true, ".png");
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_NEAREST);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_NEAREST);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_REPEAT);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_REPEAT);
+			 //use the getResource when in jar file
+			 //using GL_NEAREST_MIPMAP_LINEAR will give a slight bit 
+			 //of blur close up, this may be desirable
+			 
+			 t = TextureIO.newTexture(Files.newInputStream(Paths.get(fn_tex_track)), true, ".png");
+			 //t = TextureIO.newTexture(this.getClass().getResource(fn_tex_track), true, ".png");
+			 //t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_NEAREST_MIPMAP_LINEAR);
+			 //t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_NEAREST_MIPMAP_LINEAR);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
 			 tex_trackRoad = t;
 			 
-			 t = TextureIO.newTexture(this.getClass().getResource(fn_tex_bot), false, ".png");
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_LINEAR);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_MAG_FILTER, gl2.GL_LINEAR);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_S, gl2.GL_CLAMP_TO_EDGE);
-			 t.setTexParameterf(gl2, gl2.GL_TEXTURE_WRAP_T, gl2.GL_CLAMP_TO_EDGE);
+			 //t = TextureIO.newTexture(this.getClass().getResource(fn_tex_bot), false, ".png");
+			 t = TextureIO.newTexture(Files.newInputStream(Paths.get(fn_tex_bot)), true, ".png");
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 			 tex_bot = t;
 			 
 			 
@@ -228,11 +252,10 @@ public class TrackView extends JFrame {
 			gl2.glViewport(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			gl2.glScissor(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			
-			gl2.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			gl2.glClearColor(.8f, .8f, .8f, 1.0f);
 			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
 			
 			gl2.glLoadIdentity();
-
 			
 			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.01f, 2000.0 );
 			glu.gluLookAt(
@@ -269,11 +292,9 @@ public class TrackView extends JFrame {
 	
 	/**
 	 * Sets up vertex buffers for rendering
-	 * @param glautodrawable
 	 */
-	public void prepTrackBuffers(GLAutoDrawable glautodrawable)
+	public void prepTrackBuffers()
 	{
-		GL2 gl2 = glautodrawable.getGL().getGL2();
 		int nNodes = track.nodes.length;
 		TrackNode[] nodes = track.nodes;
 		
@@ -376,14 +397,14 @@ public class TrackView extends JFrame {
 		{
 			gl2.glActiveTexture(GL2.GL_TEXTURE0);
 			gl2.glEnable(GL2.GL_BLEND);
-			gl2.glBlendFunc(GL2.GL_ONE, gl2.GL_ONE_MINUS_SRC_ALPHA);
+			gl2.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA);
 			tex_bot.enable(gl2);
 			tex_bot.bind(gl2);
 			gl2.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE); 
 		}
 		
 		//move to bot class
-		float width = (float)bot.dimensions.x, height = (float)bot.dimensions.y;
+		float bot_width = (float)bot.dimensions.x, bot_height = (float)bot.dimensions.y;
 		
 		gl2.glPushMatrix();
 		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0f);
@@ -392,13 +413,13 @@ public class TrackView extends JFrame {
 		gl2.glBegin(GL2.GL_QUADS);
 		{
 			gl2.glTexCoord2d(1,1);
-			gl2.glVertex2d(-(width / 2), -(height/2));
+			gl2.glVertex2d(-(bot_width / 2), -(bot_height/2));
 			gl2.glTexCoord2d(1,0);
-			gl2.glVertex2d(-(width / 2),  (height/2));
+			gl2.glVertex2d(-(bot_width / 2),  (bot_height/2));
 			gl2.glTexCoord2d(0,0);
-			gl2.glVertex2d( (width / 2),  (height/2));
+			gl2.glVertex2d( (bot_width / 2),  (bot_height/2));
 			gl2.glTexCoord2d(0,1);
-			gl2.glVertex2d( (width / 2), -(height/2));
+			gl2.glVertex2d( (bot_width / 2), -(bot_height/2));
 		}
 		gl2.glEnd();
 		gl2.glTranslatef(-(float)bot.position.x, -(float)bot.position.y, 0f);

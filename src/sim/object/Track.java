@@ -1,9 +1,13 @@
+package sim.object;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import sim.util.Point2D;
 
 public class Track {
 	

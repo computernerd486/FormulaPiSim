@@ -1,3 +1,5 @@
+package sim.app;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -7,6 +9,9 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import sim.object.*;
+import sim.app.panel.*;
 
 public class TrackDesigner extends JFrame {
 

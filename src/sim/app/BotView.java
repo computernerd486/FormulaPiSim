@@ -1,3 +1,5 @@
+package sim.app;
+
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
@@ -19,6 +21,9 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
+
+import sim.util.*;
+import sim.object.*;
 
 public class BotView extends JFrame implements KeyListener {
 

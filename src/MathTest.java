@@ -1,6 +1,9 @@
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import sim.object.TrackNode;
+import sim.util.Point2D;
+
 public class MathTest {
 
 	static final double ninety = Math.toRadians(90d);

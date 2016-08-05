@@ -1,7 +1,11 @@
+package sim.util;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
+
+import sim.object.Bot;
 
 public class BotUpdater{
 
@@ -12,9 +16,7 @@ public class BotUpdater{
 	public BotUpdater(Bot bot){
 		this.bot = bot;
 	}
-	
-	
-	
+
 	public void start()
 	{
 		

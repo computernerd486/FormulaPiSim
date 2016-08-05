@@ -1,3 +1,5 @@
+package sim.app.panel;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -11,6 +13,9 @@ import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+
+import sim.object.*;
+import sim.util.*;
 
 public class ViewPort extends JPanel {
 

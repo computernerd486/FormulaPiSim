@@ -1,4 +1,6 @@
-class Point3D {
+package sim.util;
+
+public class Point3D {
 	public double x, y, z;
 
 	public Point3D(double x, double y, double z) {

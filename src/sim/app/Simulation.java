@@ -1,3 +1,5 @@
+package sim.app;
+
 import javax.swing.JFrame;
 
 public class Simulation {
