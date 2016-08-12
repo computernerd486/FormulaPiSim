@@ -20,7 +20,7 @@ public class BotUpdater{
 	public void start()
 	{
 		
-		timer = new Timer(16, new ActionListener() {
+		timer = new Timer(20, new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {

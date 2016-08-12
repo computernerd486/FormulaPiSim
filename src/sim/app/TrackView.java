@@ -142,11 +142,27 @@ public class TrackView extends JFrame {
 		
 		
 		try {
-			videoStream = new StaticImageStreamer(10);
-			((StaticImageStreamer)videoStream).setupStaticStreamer("io/video.png");
-			videoStream.video = botView;
-			videoStream.run();
 			
+			
+			//videoStream = new StaticImageStreamer(10);
+			//((StaticImageStreamer)videoStream).setupStaticStreamer("io/video.png");
+			videoStream = new RTSPStreamer();
+			//videoStream = new JMFRTPStreamer(10, new Dimension(640,480));
+			//videoStream = new RTSPStreamerServer(10, new Dimension(640, 480));
+			videoStream.video = botView;
+			
+			//JMFRTPStreamer videoStream2 = new JMFRTPStreamer(10, new Dimension(640,480));
+			//videoStream2.video = botView;
+			//videoStream2.setupStreamer();
+			
+			//((RTSPStreamerServer)videoStream).startServer();
+			
+			//((JMFRTPStreamer)videoStream).setupStreamer();
+			((RTSPStreamer)videoStream).setupRTSPStreamer();
+			((RTSPStreamer)videoStream).bot = bot;
+
+			videoStream.run();
+
 		} catch (Exception e) {
 			videoStream = null;
 			System.err.println("Unable to setup video streamer");
@@ -264,29 +280,17 @@ public class TrackView extends JFrame {
 					0d, 0d, 1d);
 			
 			drawFirstPerson(glautodrawable);
-			
-			{
-				//IntBuffer botViewBuffer = GLBuffers.newDirectIntBuffer(view_width_firstperson * view_height_firstperson);
-				
-				ByteBuffer botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
-				gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, botViewBuffer);
-				
-				for (int y = 0; y < view_height_firstperson; y++) {
-	                for (int x = 0; x < view_width_firstperson; x++) {
-	                	botView.setRGB(x, y, ((botViewBuffer.get()*2) << 16) | ((botViewBuffer.get()*2) << 8) | (botViewBuffer.get()*2));
-	                	//System.arraycopy(botViewBuffer, 0, botView.get, , length);
-	                }
-	            }
-			}
 		}
 		
 		gl2.glFlush();
 		
+		/*
 		if (framecounter++ >= 60)
 		{
 			framecounter = 0;
 			System.out.println(anim.getLastFPS());
 		} 
+		*/
 	}
 	
 	
@@ -433,7 +437,15 @@ public class TrackView extends JFrame {
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		drawTrack(glautodrawable);
-	
+		
+		ByteBuffer botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
+		gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, botViewBuffer);
+		
+		for (int y = 0; y < view_height_firstperson; y++) {
+            for (int x = 0; x < view_width_firstperson; x++) {
+            	botView.setRGB(x, y, ((botViewBuffer.get()*2) << 16) | ((botViewBuffer.get()*2) << 8) | (botViewBuffer.get()*2));
+            }
+        }
 	}
 	
 	public static void main(String[] args) {
