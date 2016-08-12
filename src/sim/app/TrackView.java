@@ -3,6 +3,10 @@ package sim.app;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
@@ -95,6 +99,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	VideoSettings vs;
 	
 	public TrackView() {
+		
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		int monitor_width = gd.getDisplayMode().getWidth();
+		int monitor_height = gd.getDisplayMode().getHeight();
+		System.out.println("Screen: [" + monitor_width + "x" + monitor_height + "]");
 	
 		botView = new BufferedImage(view_width_firstperson, view_height_firstperson, BufferedImage.TYPE_INT_RGB);
 		
@@ -108,8 +117,6 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		glu = new GLU();
 
-
-		//this.setSize(width, height);
 		this.glcanvas.setPreferredSize(new Dimension(width - settings_width, height));
 		this.getContentPane().add(glcanvas, BorderLayout.CENTER);
 		
@@ -147,18 +154,17 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		
 		try {
-			videoStream = new RTSPStreamer();
+			videoStream = new RTSPStreamer(30, new Dimension(640, 480));
 			videoStream.video = botView;
-
-			((RTSPStreamer)videoStream).setupRTSPStreamer();
 			((RTSPStreamer)videoStream).bot = bot;
-			videoStream.run();
 
 		} catch (Exception e) {
 			videoStream = null;
 			System.err.println("Unable to setup video streamer");
 			e.printStackTrace(System.err);
 		}
+				
+		initSettingsControls();
 		
 		this.addWindowListener(this);
 		this.pack();
@@ -167,7 +173,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	private void tearDown()
 	{
 		if (videoStream != null)
-			videoStream.stop();
+		{
+			videoStream.stop();				
+		}
 	}
 	
 	public void loadTextures(GLAutoDrawable glautodrawable)
@@ -407,6 +415,50 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	}
 	
 
+	private void initSettingsControls() {
+		vs.server_stop.setEnabled(false);
+		
+		vs.server_start.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try{
+					int x = Integer.parseInt(vs.resX.getText());
+					int y = Integer.parseInt(vs.resY.getText());
+					int port = Integer.parseInt(vs.port.getText());
+					
+					vs.server_start.setEnabled(false);
+					vs.server_stop.setEnabled(true);
+					vs.resX.setEnabled(false);
+					vs.resY.setEnabled(false);
+					vs.port.setEnabled(false);
+					vs.runningStatus.setText("Running");
+
+					((RTSPStreamer)videoStream).setupRTSPStreamer(new Dimension(x, y), port);
+					videoStream.run();
+					
+				} catch (Exception ex) {
+					vs.runningStatus.setText("Error Starting");
+					ex.printStackTrace(System.err);
+				}
+				
+			}
+		});
+		
+		vs.server_stop.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				vs.server_start.setEnabled(true);
+				vs.server_stop.setEnabled(false);
+				vs.resX.setEnabled(true);
+				vs.resY.setEnabled(true);
+				vs.port.setEnabled(true);
+				vs.runningStatus.setText("Stopped");
+				videoStream.stop();
+			}
+		});
+	}
+	
 
 	//WindowListener
 	@Override

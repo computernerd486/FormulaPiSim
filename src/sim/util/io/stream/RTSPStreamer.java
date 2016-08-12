@@ -44,6 +44,12 @@ import sim.object.Bot;
  */
 public class RTSPStreamer extends VideoStreamer {
 
+	public boolean isRunning = false;
+	public int port;
+	
+	ServerBootstrap b;
+	EventLoopGroup workerGroup;
+	
 	BufferedImage out;
 	
 	public Bot bot;
@@ -64,18 +70,44 @@ public class RTSPStreamer extends VideoStreamer {
 	public RTSPStreamer(int fps, Dimension size) {
 		super(fps, size);
 	}
-
-	public void setupRTSPStreamer()
+	
+	public void setupRTSPStreamer(Dimension size, int port) throws Exception
 	{
-		out = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+		if (!isRunning) {
+			this.out = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+			this.port = port;
+			this.size = size;
+		} else {
+			throw new Exception("Unable to setup Stream while Streaming is Active");
+		}
+	}
+	
+	@Override
+	public void stream() {
+		if (video != null)
+		{
+			out.getGraphics().drawImage(video, 0, 0,  size.width, size.height, null);
+		}
+	}
+	
+	@Override
+	public void stop() {
+		super.stop();
+		workerGroup.shutdownGracefully();
+		isRunning = false;
+	};
+	
+	@Override
+	public void run() {
+		super.run();
 		
 		new Thread() {
 			public void run() {
 				
 				System.out.println("Starting Server");
-		        EventLoopGroup workerGroup = new NioEventLoopGroup();
+		        workerGroup = new NioEventLoopGroup();
 		        try {
-		            ServerBootstrap b = new ServerBootstrap(); // (2)
+		            b = new ServerBootstrap(); // (2)
 		            b.group(workerGroup);
 		            b.channel(NioServerSocketChannel.class); // (3)
 		            b.childHandler(new ChannelInitializer<SocketChannel>() { // (4)
@@ -90,13 +122,13 @@ public class RTSPStreamer extends VideoStreamer {
 		             });
 		            
 		             b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
-		             //b.childOption(ChannelOption.TCP_NODELAY, true);
+		             b.childOption(ChannelOption.TCP_NODELAY, true);
 		
 		            // Bind and start to accept incoming connections.
-		            ChannelFuture f = b.bind(10000).sync(); // (7)
+		            ChannelFuture f = b.bind(port).sync(); // (7)
 		
 		            System.out.println("After Bind");
-		            
+		            isRunning = true;
 		            // Wait until the server socket is closed.
 		            // In this example, this does not happen, but you can do that to gracefully
 		            // shut down your server.
@@ -110,15 +142,9 @@ public class RTSPStreamer extends VideoStreamer {
 		        }
 			}
 		}.start();
-	}
-	
-	@Override
-	public void stream() {
-		if (video != null)
-		{
-			out.getGraphics().drawImage(video, 0, 0,  size.width, size.height, null);
-		}
-	}
+	};
+
+
 			
 	
 	class ResponseHandler extends ChannelInboundHandlerAdapter  {
@@ -140,29 +166,30 @@ public class RTSPStreamer extends VideoStreamer {
 				System.out.println("Client received: " + msg.toString()); //msg.toString(CharsetUtil.UTF_8));
 				
 				//Speed Updation from request call
-				QueryStringDecoder decoder = new QueryStringDecoder(uri);
-				String m1 = decoder.parameters().get("m1").get(0);
-				String m2 = decoder.parameters().get("m2").get(0);
-				
-				System.out.println(m1 + " : " + m2);
-				
-				try {
-					Float m1_spd = null, m2_spd = null;
+				if (uri.contains("m1") && uri.contains("m2"))
+				{
+					QueryStringDecoder decoder = new QueryStringDecoder(uri);
+					String m1 = decoder.parameters().get("m1").get(0);
+					String m2 = decoder.parameters().get("m2").get(0);
+					System.out.println(m1 + " : " + m2);
 					
-					if (m1 != null && !"".equals(m1))
-						m1_spd = Math.max(-1, Math.min(1, Float.parseFloat(m1)));
-					
-					if (m1 != null && !"".equals(m1)) 
-						m2_spd = Math.max(-1, Math.min(1, Float.parseFloat(m2)));
-					
-					if (m1_spd != null) bot.p_m1 = m1_spd;
-					if (m2_spd != null) bot.p_m2 = m2_spd;
-					
-				} catch (Exception e) {
-					System.err.println("Unable to parse speeds");
-					e.printStackTrace(System.err);
+					try {
+						Float m1_spd = null, m2_spd = null;
+						
+						if (m1 != null && !"".equals(m1))
+							m1_spd = Math.max(-1, Math.min(1, Float.parseFloat(m1)));
+						
+						if (m1 != null && !"".equals(m1)) 
+							m2_spd = Math.max(-1, Math.min(1, Float.parseFloat(m2)));
+						
+						if (m1_spd != null) bot.p_m1 = m1_spd;
+						if (m2_spd != null) bot.p_m2 = m2_spd;
+						
+					} catch (Exception e) {
+						System.err.println("Unable to parse speeds");
+						e.printStackTrace(System.err);
+					}
 				}
-				
 			}
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();   
@@ -194,86 +221,6 @@ public class RTSPStreamer extends VideoStreamer {
 		}
 
 		
-	}
-
-	class StreamServerHandler extends ChannelInboundHandlerAdapter {
-		@Override
-		public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
-		    try {
-		    	
-		        FullHttpResponse httpResponse = new DefaultFullHttpResponse(RtspVersions.RTSP_1_0, RtspResponseStatuses.OK);
-		        httpResponse.headers().add(RtspHeaderNames.SERVER, "SimulationStream");
-		        httpResponse.headers().add(RtspHeaderNames.SESSION, "1");
-		        httpResponse.headers().add(RtspHeaderNames.CONTENT_TYPE, "text/parameters");
-		        //httpResponse.headers().add(RtspHeaderNames.CONTENT_LENGTH, content.length);
-		        httpResponse.headers().add(RtspHeaderNames.CSEQ, "1");
-		        
-		        ctx.channel().writeAndFlush(httpResponse);
-		    	
-		    } finally {
-		        ReferenceCountUtil.release(msg); // (2)
-		    }
-		}
-		
-		@Override
-	    public void channelReadComplete(ChannelHandlerContext ctx) {
-	        ctx.flush();
-	    }
-		
-		@Override
-	    public void channelActive(final ChannelHandlerContext ctx) { // (1)
-	       
-	        //time.writeInt((int) (System.currentTimeMillis() / 1000L + 2208988800L));
-
-			/**
-	        try {
-	        	ByteArrayOutputStream baos = new ByteArrayOutputStream();   
-				ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
-				ImageIO.write(out, "jpeg", ios);
-		        
-	
-		        byte[] buffer = new byte[(int)ios.length()];
-		        ios.read(buffer, 0, (int)ios.length());
-		        
-		        final ByteBuf response = ctx.alloc().buffer((int)ios.length()); // (2)
-		        
-		        response.writeBytes(buffer);
-		        
-		        FullHttpResponse httpResponse = new DefaultFullHttpResponse(RtspVersions.RTSP_1_0, RtspResponseStatuses.OK);
-		        httpResponse.headers().add(RtspHeaderNames.SERVER, "SimulationStream");
-		        httpResponse.headers().add(RtspHeaderNames.SESSION, "1");
-		        httpResponse.headers().add(RtspHeaderNames.CONTENT_TYPE, "rtp/jpeg");
-		        httpResponse.content().writeBytes(buffer);
-		        
-		        RtspEncoder encoder = new RtspEncoder();
-		        
-		        final ChannelFuture f = ctx.writeAndFlush(httpResponse); // (3)
-		        
-		        
-		        f.addListener(new ChannelFutureListener() {
-		            @Override
-		            public void operationComplete(ChannelFuture future) {
-		                assert f == future;
-		                ctx.close();
-		            }
-		        }); // (4)
-		        
-		        baos.close();
-	        
-	        } catch (Exception e) {
-	        	e.printStackTrace(System.err);
-	        }
-	        **/
-	        
-	    }
-
-
-		@Override
-		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
-			// Close the connection when an exception is raised.
-			cause.printStackTrace();
-			ctx.close();
-		}
 	}
 
 }

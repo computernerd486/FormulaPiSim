@@ -22,9 +22,15 @@ public class VideoSettings extends JPanel {
 	 *  | Start |   | Stop |
 	 */
 	
-	private JTextField resX;
-	private JTextField resY;
-	private JTextField port;
+	public JTextField resX;
+	public JTextField resY;
+	public JTextField port;
+	
+	public JButton server_stop;
+	public JButton server_start;
+	
+	public JLabel runningStatus; 
+	
 	
 	public VideoSettings() {	
 		
@@ -80,11 +86,11 @@ public class VideoSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.WEST, lblStatus, 0, SpringLayout.WEST, lblResolution);
 		this.add(lblStatus);
 		
-		JLabel lblRunning = new JLabel("Running");
-		springLayout.putConstraint(SpringLayout.NORTH, lblStatus, 0, SpringLayout.NORTH, lblRunning);
-		springLayout.putConstraint(SpringLayout.NORTH, lblRunning, 6, SpringLayout.SOUTH, port);
-		springLayout.putConstraint(SpringLayout.EAST, lblRunning, 0, SpringLayout.EAST, resY);
-		this.add(lblRunning);
+		runningStatus = new JLabel("Stopped");
+		springLayout.putConstraint(SpringLayout.NORTH, lblStatus, 0, SpringLayout.NORTH, runningStatus);
+		springLayout.putConstraint(SpringLayout.NORTH, runningStatus, 6, SpringLayout.SOUTH, port);
+		springLayout.putConstraint(SpringLayout.EAST, runningStatus, 0, SpringLayout.EAST, resY);
+		this.add(runningStatus);
 				
 		JPanel panel = new JPanel();
 		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.SOUTH, lblStatus);
@@ -93,11 +99,11 @@ public class VideoSettings extends JPanel {
 		this.add(panel);
 		panel.setLayout(new GridLayout(0, 2, 10, 0));
 		
-		JButton btnStart = new JButton("Start");
-		panel.add(btnStart);
+		server_start = new JButton("Start");
+		panel.add(server_start);
 		
-		JButton btnStop = new JButton("Stop");
-		panel.add(btnStop);
+		server_stop = new JButton("Stop");
+		panel.add(server_stop);
 	}
 	
 }

@@ -36,7 +36,7 @@ public abstract class VideoStreamer implements Runnable{
 	
 	@Override
 	public void run() {
-		ticker.scheduleAtFixedRate(new TimerTask() {
+		this.ticker.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				stream();
@@ -45,7 +45,8 @@ public abstract class VideoStreamer implements Runnable{
 	}
 	
 	public void stop() {
-		ticker.cancel();
+		this.ticker.cancel();
+		this.ticker = new Timer(true);
 	}
 	
 	
