@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
@@ -10,7 +11,10 @@ public class PanelTest extends JFrame {
 	{
 		VideoSettings vs = new VideoSettings();
 		
+		this.getContentPane().setPreferredSize(new Dimension(200, 500));
 		this.getContentPane().add(vs, BorderLayout.CENTER);
+		
+		this.pack();
 	}
 
 	public static void main(String[] args) {

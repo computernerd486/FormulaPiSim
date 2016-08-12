@@ -25,14 +25,11 @@ public class Bot {
 	
 	public float m_ref_rpm = 180f;
 	public float m_run_rpm = (m_run_volt / m_ref_volt) * m_ref_rpm;
-	public float m_run_rpms = m_run_rpm / 60f / 1000f;
 	
 	//@see BotUpdater for this, in ms
 	public float update_period = 20f;
-	public float m_dist_peroid = m_ref_rpm / (60f / 1000f * update_period);
-	
-	public float m_rad_peroid = (float) ((m_run_rpms * 2 * Math.PI) / (60f * 1000f * update_period));
-	
+	public float m_dist_peroid = tyre_circ * (m_run_rpm / (60f * 1000f) * update_period);
+		
 	public float bot_width = 8.4f;
 	public float tyre_width = 4.2f;
 	public float bot_radius = (bot_width / 2) + (tyre_width / 2); 
@@ -71,7 +68,7 @@ public class Bot {
 		this.focus = new Point3D(
 				(Math.cos(Math.toRadians(angle)) * 10d) + position.x,
 				(Math.sin(Math.toRadians(angle)) * 10d) + position.y,
-				(double)(height - 0.2f));
+				(double)(height - 0.2f)); //2% down angle
 		
 		//System.out.println("Positon " + position);
 		//System.out.println("Angle   " + direction);
@@ -85,37 +82,18 @@ public class Bot {
 	 */
 	public void move()
 	{		
-		float m1_dist = m_rad_peroid * p_m1;
-		float m2_dist = m_rad_peroid * p_m2;
+		//m1 is left, m2 is right
+		float velocityR = m_dist_peroid * p_m2;
+		float velocityL = m_dist_peroid * p_m1;
 		
 		float angle = (float) Math.toRadians(direction);
-		
-		
-		// "speed" must be expressed in units per second
-		float velocityR = m1_dist;
-		float velocityL = m2_dist;
-
-		// "width" must be expressed in units
-		angle += (velocityR - velocityL) / (bot_radius) * 2;
+		angle += (velocityR - velocityL) / (bot_radius * 2);
 		position.x += 0.5 * (velocityR + velocityL) * Math.cos(angle);
-		position.y -= 0.5 * (velocityR + velocityL) * Math.sin(angle);
-		System.out.println(angle + " : [" + position.x + "," + position.y + "]");
+		position.y += 0.5 * (velocityR + velocityL) * Math.sin(angle);
+		//System.out.println(velocityL + " : " + velocityR);
+		//System.out.println(angle + " : [" + position.x + "," + position.y + "]");
 		
-		setDirection((float) Math.toDegrees(angle));
-		
-		//create movement vector, move straight for 
-		//double x = Math.cos(Math.toRadians(angle)) * (p_m1 * speed);
-		//double y = Math.sin(Math.toRadians(angle)) * (p_m1 * speed);
-		
-		//position.x += x;
-		//position.y += y;
-		
-		//sets the new facing direction
-		//direction = 0f;
-		
-		
-		//setDirection(direction);
-		
+		setDirection((float) Math.toDegrees(angle));		
 		
 	}
 	

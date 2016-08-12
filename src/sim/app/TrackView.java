@@ -1,6 +1,7 @@
 package sim.app;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -10,6 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +29,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
+import sim.app.panel.VideoSettings;
 import sim.object.*;
 import sim.util.*;
 import sim.util.io.stream.*;
@@ -44,7 +47,7 @@ import sim.util.io.stream.*;
  * @author Tim Pearce
  *
  */
-public class TrackView extends JFrame {
+public class TrackView extends JFrame implements WindowListener, GLEventListener{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -89,6 +92,7 @@ public class TrackView extends JFrame {
 	
 	//IO for video and motor control
 	VideoStreamer videoStream;
+	VideoSettings vs;
 	
 	public TrackView() {
 	
@@ -96,25 +100,7 @@ public class TrackView extends JFrame {
 		
 		GLCapabilities capabilities = new GLCapabilities(GLProfile.getDefault());
 		glcanvas = new GLCanvas(capabilities);
-		glcanvas.addGLEventListener(new GLEventListener() {
-			
-			@Override
-			public void reshape(GLAutoDrawable glautodrawable, int x, int y, int width, int height) {}
-			
-			@Override
-			public void init(GLAutoDrawable glautodrawable ) {
-				loadTextures(glautodrawable);
-				prepTrackBuffers();
-			}
-			
-			@Override
-			public void dispose(GLAutoDrawable glautodrawable ) {}
-			
-			@Override
-			public void display(GLAutoDrawable glautodrawable ) {
-				 draw(glautodrawable);
-			}
-		});
+		glcanvas.addGLEventListener(this);
 		
 		anim = new Animator(glcanvas);
 		anim.setUpdateFPSFrames(10, null);
@@ -123,13 +109,32 @@ public class TrackView extends JFrame {
 		glu = new GLU();
 
 
-		this.setSize(width, height);
+		//this.setSize(width, height);
+		this.glcanvas.setPreferredSize(new Dimension(width - settings_width, height));
 		this.getContentPane().add(glcanvas, BorderLayout.CENTER);
 		
+		//Settings Area
 		JPanel p = new JPanel();
-		p.add(new JLabel("Overview:"));
-		p.setPreferredSize(new Dimension(settings_width, 100));
+		p.setPreferredSize(new Dimension(settings_width, height));
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		this.getContentPane().add(p, BorderLayout.EAST);
+		
+		{
+			JPanel h = new JPanel();
+			h.setBackground(Color.LIGHT_GRAY);
+			h.add(new JLabel("Video Stream Settings", JLabel.CENTER));
+			p.add(h);
+		}
+		
+		vs = new VideoSettings();
+		p.add(vs);
+		
+		{
+			JPanel h = new JPanel();
+			h.setBackground(Color.LIGHT_GRAY);
+			h.add(new JLabel("PiBorg Control", JLabel.CENTER));
+			p.add(h);
+		}
 
 		track = new Track();
 		track.load(track_default);
@@ -142,25 +147,11 @@ public class TrackView extends JFrame {
 		
 		
 		try {
-			
-			
-			//videoStream = new StaticImageStreamer(10);
-			//((StaticImageStreamer)videoStream).setupStaticStreamer("io/video.png");
 			videoStream = new RTSPStreamer();
-			//videoStream = new JMFRTPStreamer(10, new Dimension(640,480));
-			//videoStream = new RTSPStreamerServer(10, new Dimension(640, 480));
 			videoStream.video = botView;
-			
-			//JMFRTPStreamer videoStream2 = new JMFRTPStreamer(10, new Dimension(640,480));
-			//videoStream2.video = botView;
-			//videoStream2.setupStreamer();
-			
-			//((RTSPStreamerServer)videoStream).startServer();
-			
-			//((JMFRTPStreamer)videoStream).setupStreamer();
+
 			((RTSPStreamer)videoStream).setupRTSPStreamer();
 			((RTSPStreamer)videoStream).bot = bot;
-
 			videoStream.run();
 
 		} catch (Exception e) {
@@ -169,32 +160,8 @@ public class TrackView extends JFrame {
 			e.printStackTrace(System.err);
 		}
 		
-		this.addWindowListener(new WindowListener() {
-			
-			@Override
-			public void windowOpened(WindowEvent e) {}
-			
-			@Override
-			public void windowIconified(WindowEvent e) {}
-			
-			@Override
-			public void windowDeiconified(WindowEvent e) {}
-			
-			@Override
-			public void windowDeactivated(WindowEvent e) {}
-			
-			//Tear it down! Clenaup everything
-			@Override
-			public void windowClosing(WindowEvent e) {
-				tearDown();
-			}
-			
-			@Override
-			public void windowClosed(WindowEvent e) {}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {}
-		});
+		this.addWindowListener(this);
+		this.pack();
 	}
 	
 	private void tearDown()
@@ -283,16 +250,7 @@ public class TrackView extends JFrame {
 		}
 		
 		gl2.glFlush();
-		
-		/*
-		if (framecounter++ >= 60)
-		{
-			framecounter = 0;
-			System.out.println(anim.getLastFPS());
-		} 
-		*/
 	}
-	
 	
 	/**
 	 * Sets up vertex buffers for rendering
@@ -448,6 +406,55 @@ public class TrackView extends JFrame {
         }
 	}
 	
+
+
+	//WindowListener
+	@Override
+	public void windowActivated(WindowEvent e) {}
+
+	@Override
+	public void windowClosed(WindowEvent e) {}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		tearDown();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+
+	@Override
+	public void windowIconified(WindowEvent e) {}
+
+	@Override
+	public void windowOpened(WindowEvent e) {}
+
+	
+	//GL Event Listener Methods
+	@Override
+	public void reshape(GLAutoDrawable glautodrawable, int x, int y, int width, int height) {}
+	
+	@Override
+	public void init(GLAutoDrawable glautodrawable ) {
+		loadTextures(glautodrawable);
+		prepTrackBuffers();
+	}
+	
+	@Override
+	public void dispose(GLAutoDrawable glautodrawable ) {}
+	
+	@Override
+	public void display(GLAutoDrawable glautodrawable ) {
+		 draw(glautodrawable);
+	}
+	
+	/**
+	 * Runs the main part of the simulation, the track view
+	 * @param args
+	 */
 	public static void main(String[] args) {
 
 		TrackView w = new TrackView();
@@ -455,5 +462,4 @@ public class TrackView extends JFrame {
 		w.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 	}
-
 }
