@@ -14,11 +14,14 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SpringLayout;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -33,6 +36,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
+import sim.app.panel.BotSettings;
 import sim.app.panel.VideoSettings;
 import sim.object.*;
 import sim.util.*;
@@ -96,7 +100,10 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	//IO for video and motor control
 	VideoStreamer videoStream;
+	
+	//Settings Panels
 	VideoSettings vs;
+	BotSettings bs;
 	
 	public TrackView() {
 		
@@ -120,28 +127,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		this.glcanvas.setPreferredSize(new Dimension(width - settings_width, height));
 		this.getContentPane().add(glcanvas, BorderLayout.CENTER);
 		
-		//Settings Area
-		JPanel p = new JPanel();
-		p.setPreferredSize(new Dimension(settings_width, height));
-		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		this.getContentPane().add(p, BorderLayout.EAST);
-		
-		{
-			JPanel h = new JPanel();
-			h.setBackground(Color.LIGHT_GRAY);
-			h.add(new JLabel("Video Stream Settings", JLabel.CENTER));
-			p.add(h);
-		}
-		
-		vs = new VideoSettings();
-		p.add(vs);
-		
-		{
-			JPanel h = new JPanel();
-			h.setBackground(Color.LIGHT_GRAY);
-			h.add(new JLabel("PiBorg Control", JLabel.CENTER));
-			p.add(h);
-		}
+		initSettingsPanel();
 
 		track = new Track();
 		track.load(track_default);
@@ -168,6 +154,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		this.addWindowListener(this);
 		this.pack();
+		
+		Timer t = new Timer(true);
+		t.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				writeMemUsage();
+			}
+		}, 0, 10000);
 	}
 	
 	private void tearDown()
@@ -413,9 +408,32 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
             }
         }
 	}
+
+	private void initSettingsPanel() {
+		//Settings Area
+		JPanel p = new JPanel();
+		p.setPreferredSize(new Dimension(settings_width, height));
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		
+		//SpringLayout springLayout = new SpringLayout();
+		//p.setLayout(springLayout);
+		this.getContentPane().add(p, BorderLayout.EAST);
 	
+		vs = new VideoSettings();
+		//springLayout.putConstraint(SpringLayout.WEST, vs, 0, SpringLayout.WEST, p);
+		//springLayout.putConstraint(SpringLayout.EAST, vs, 0, SpringLayout.EAST, p);
+		p.add(vs);
+		
+		
+		bs = new BotSettings();
+		//springLayout.putConstraint(SpringLayout.NORTH, bs, 100, SpringLayout.SOUTH, vs);
+		//springLayout.putConstraint(SpringLayout.WEST, bs, 0, SpringLayout.WEST, p);
+		//springLayout.putConstraint(SpringLayout.EAST, bs, 0, SpringLayout.EAST, p);
+		p.add(bs);
+	}
 
 	private void initSettingsControls() {
+		//Start with Server
 		vs.server_stop.setEnabled(false);
 		
 		vs.server_start.addActionListener(new ActionListener() {
@@ -457,6 +475,59 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				videoStream.stop();
 			}
 		});
+		
+		//Next with the bot controls
+		
+		bs.bot_start.setEnabled(false);
+		
+		bs.bot_start.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				bs.bot_start.setEnabled(false);
+				bs.bot_stop.setEnabled(true);
+				botUpdater.start();
+			}
+		});
+		
+		bs.bot_stop.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				bs.bot_start.setEnabled(true);
+				bs.bot_stop.setEnabled(false);
+				botUpdater.stop();
+			}
+		});
+		
+		bs.bot_reset.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TrackNode start = track.nodes[0];
+				bot.p_m1 = 0f;
+				bot.p_m2 = 0f;
+				bot.position = new Point2D(start.p.x, start.p.y);
+				bot.setDirection( 180f);
+
+			}
+		});
+	}
+	
+	private void writeMemUsage()
+	{
+		int mb = 1024 * 1024; 
+		 
+		// get Runtime instance
+		Runtime instance = Runtime.getRuntime();
+ 
+		System.out.println("***** Heap usage [MB] *****");
+		System.out.printf("%1$6s %2$6s %3$6s %4$6s", "Total", "Free", "Used", "Max");
+		System.out.println();
+		System.out.printf("%1$6s %2$6s %3$6s %4$6s", 
+				(instance.totalMemory() / mb), 
+				(instance.freeMemory() / mb),
+				((instance.totalMemory() - instance.freeMemory()) / mb), 
+				(instance.maxMemory() / mb));
+		System.out.println();
+		System.out.println();
 	}
 	
 

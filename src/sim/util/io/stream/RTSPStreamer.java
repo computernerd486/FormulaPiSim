@@ -93,8 +93,11 @@ public class RTSPStreamer extends VideoStreamer {
 	@Override
 	public void stop() {
 		super.stop();
-		workerGroup.shutdownGracefully();
-		isRunning = false;
+		
+		if (isRunning) {
+			workerGroup.shutdownGracefully();
+			isRunning = false;
+		}
 	};
 	
 	@Override

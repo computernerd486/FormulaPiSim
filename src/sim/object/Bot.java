@@ -34,6 +34,9 @@ public class Bot {
 	public float tyre_width = 4.2f;
 	public float bot_radius = (bot_width / 2) + (tyre_width / 2); 
 	
+	public float bot_bound_width = 18f;
+	public float bot_bound_length = 19f;
+	
 	public Bot()
 	{
 		this(new Point2D(0,0));
@@ -47,7 +50,8 @@ public class Bot {
 	
 	public Bot(Point2D start, float angle)
 	{
-		this.dimensions = new Point2D(19, 18);
+		//I'm actually pointing left
+		this.dimensions = new Point2D(bot_bound_length, bot_bound_width);
 		this.position = start;
 		this.height = 4.15f;
 		this.speed = 2f;
