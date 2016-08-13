@@ -3,6 +3,7 @@ package sim.app;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
@@ -33,6 +34,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -74,11 +76,13 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	//hard codes win here for now.
 	private static final String fn_tex_track = "img/track_v3.png";
 	private static final String fn_tex_bot = "img/bot.png";
+	private static final String fn_tex_botOverview = "img/bot_overview.png";
 	private static final String track_default = "final.trk";
 	
 	//Texture Section, this should be in a loader
 	Texture tex_trackRoad;
 	Texture tex_bot;
+	Texture tex_bot_overview;
 
 	//Bot
 	public Bot bot;
@@ -104,6 +108,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	//Settings Panels
 	VideoSettings vs;
 	BotSettings bs;
+	
+	//For Drawing opengl text
+	TextRenderer tr;
 	
 	public TrackView() {
 		
@@ -138,6 +145,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
 		
+		tr = new TextRenderer(new Font("SansSerif", Font.PLAIN, 24));
 		
 		try {
 			videoStream = new RTSPStreamer(30, new Dimension(640, 480));
@@ -204,6 +212,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 			 tex_bot = t;
 			 
+
+			//t = TextureIO.newTexture(this.getClass().getResource(fn_tex_bot), false, ".png");
+			 t = TextureIO.newTexture(Files.newInputStream(Paths.get(fn_tex_botOverview)), true, ".png");
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+			 t.setTexParameterf(gl2, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+			 tex_bot_overview = t;
 			 
 		 } catch (Exception e) {
 			 e.printStackTrace(System.err);
@@ -252,6 +268,36 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			drawFirstPerson(glautodrawable);
 		}
 		
+		//Bot overview for motor control
+		{
+			gl2.glViewport(view_width_firstperson, height - 200, 200, 200);
+			gl2.glScissor(view_width_firstperson, height - 200, 200, 200);
+			gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			gl2.glColor3f(1f, 1f, 1f);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			
+			gl2.glMatrixMode(GL2.GL_PROJECTION);
+			gl2.glLoadIdentity();
+			gl2.glOrtho(0, 100, 0, 100, -1, 1);
+			
+			drawOverview(glautodrawable);
+		}
+		
+		//Alpha Warning Text
+		{
+			gl2.glViewport(0, 0, glcanvas.getWidth(), glcanvas.getHeight());
+			gl2.glScissor(0, 0,  glcanvas.getWidth(), glcanvas.getHeight());
+			
+			gl2.glMatrixMode(GL2.GL_PROJECTION);
+			gl2.glLoadIdentity();
+			gl2.glOrtho(0, 500, 0, 400, -1, 1);
+			
+			tr.beginRendering(500, 400);
+			tr.setColor(1f, 1f, 1f, .6f);
+			tr.draw("ALPHA RELEASE - NOT FOR DISTRIBUTION", 5, 200);
+			tr.endRendering();
+		}
+
 		gl2.glFlush();
 	}
 	
@@ -407,6 +453,90 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
             	botView.setRGB(x, y, ((botViewBuffer.get()*2) << 16) | ((botViewBuffer.get()*2) << 8) | (botViewBuffer.get()*2));
             }
         }
+	}
+	
+	public void drawOverview(GLAutoDrawable glautodrawable) 
+	{
+		GL2 gl2 = glautodrawable.getGL().getGL2();
+		
+		if (tex_bot_overview != null)
+		{
+			gl2.glActiveTexture(GL2.GL_TEXTURE0);
+			gl2.glEnable(GL2.GL_BLEND);
+			gl2.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			tex_bot_overview.enable(gl2);
+			tex_bot_overview.bind(gl2);
+			gl2.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE); 
+		}
+		
+		
+		gl2.glPushMatrix();
+		gl2.glTranslatef(50f,50f,0f);
+
+
+		gl2.glBegin(GL2.GL_QUADS);
+		{
+			gl2.glTexCoord2d(0,0);
+			gl2.glVertex2d(-40, -40);
+			gl2.glTexCoord2d(0,1);
+			gl2.glVertex2d(-40,  40);
+			gl2.glTexCoord2d(1,1);
+			gl2.glVertex2d( 40,  40);
+			gl2.glTexCoord2d(1,0);
+			gl2.glVertex2d( 40, -40);
+		}
+		gl2.glEnd();
+		
+		if (tex_bot_overview != null)
+			tex_bot_overview.disable(gl2);
+		
+		
+		float m1 = bot.p_m1, m2 = bot.p_m2;
+		float r,g;
+		
+		r = (m1 < 0) ? 1 : 0;
+		g = (m1 > 0) ? 1 : 0;
+		gl2.glBegin(GL2.GL_QUADS);
+		{
+			if (m1 >= 0) {
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, (40 * m1));
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, (40 * m1));
+			} else {
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, (40 * m1));
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, (40 * m1));
+			}
+
+		}
+		gl2.glEnd();
+		
+		r = (m2 < 0) ? 1 : 0;
+		g = (m2 > 0) ? 1 : 0;
+		gl2.glBegin(GL2.GL_QUADS);
+		{
+			if (m2 < 0) {
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, (40 * m2));
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, (40 * m2));
+			} else {
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, 0);
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, (40 * m2));
+				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, (40 * m2));
+			}
+
+		}
+		gl2.glEnd();
+		
+		gl2.glTranslatef(-50, -50, 0f);
+		gl2.glPopMatrix();
+		
+		if (tex_bot_overview != null)
+			tex_bot_overview.disable(gl2);
 	}
 
 	private void initSettingsPanel() {
