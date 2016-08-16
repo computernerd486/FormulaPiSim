@@ -1,3 +1,7 @@
+/**
+* Copyright 2016 Tim Pearce
+**/
+
 package sim.util;
 
 public class Point3D {

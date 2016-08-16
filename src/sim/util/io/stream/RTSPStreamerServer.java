@@ -1,3 +1,7 @@
+/**
+* Copyright 2016 Tim Pearce
+**/
+
 package sim.util.io.stream;
 
 
@@ -13,9 +17,6 @@ import rtsp.*;
 /**
  * This is going to be an odd class, it'll kick off an http/rtsp server
  * and start streaming the video to that.
- * 
- * @author Tim Pearce
- *
  */
 public class RTSPStreamerServer extends VideoStreamer {
 

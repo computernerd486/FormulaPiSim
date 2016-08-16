@@ -1,3 +1,7 @@
+/**
+* Copyright 2016 Tim Pearce
+**/
+
 import sim.util.Point2D;
 
 public class SimpleATan {

@@ -1,3 +1,7 @@
+/**
+* Copyright 2016 Tim Pearce
+**/
+
 package sim.object;
 
 import sim.util.Point2D;

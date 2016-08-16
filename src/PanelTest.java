@@ -1,3 +1,7 @@
+/**
+* Copyright 2016 Tim Pearce
+**/
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
