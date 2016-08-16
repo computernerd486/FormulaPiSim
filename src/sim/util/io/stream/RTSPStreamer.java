@@ -6,6 +6,7 @@ package sim.util.io.stream;
 
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
@@ -33,10 +34,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.rtsp.RtspHeaderNames;
-import io.netty.handler.codec.rtsp.RtspResponseStatuses;
-import io.netty.handler.codec.rtsp.RtspVersions;
-import io.netty.util.ReferenceCountUtil;
 import sim.object.Bot;
 
 /**
@@ -52,6 +49,7 @@ public class RTSPStreamer extends VideoStreamer {
 	EventLoopGroup workerGroup;
 	
 	BufferedImage out;
+	Graphics2D g;
 	
 	public Bot bot;
 	
@@ -78,6 +76,9 @@ public class RTSPStreamer extends VideoStreamer {
 			this.out = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 			this.port = port;
 			this.size = size;
+			
+			g = (Graphics2D)out.getGraphics();
+			
 		} else {
 			throw new Exception("Unable to setup Stream while Streaming is Active");
 		}
@@ -87,7 +88,7 @@ public class RTSPStreamer extends VideoStreamer {
 	public void stream() {
 		if (video != null)
 		{
-			out.getGraphics().drawImage(video, 0, 0,  size.width, size.height, null);
+			g.drawImage(video, size.width, 0,  -size.width, size.height, null);
 		}
 	}
 	
