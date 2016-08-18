@@ -5,8 +5,6 @@
 package sim.app.panel;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.Box;
@@ -81,7 +79,7 @@ public class BotSettings extends JPanel {
 		settings.add(lblMaxDecceleration);
 		
 		accel = new JSpinner();
-		accel.setModel(new SpinnerNumberModel(new Float(0.1f), new Float(0), new Float(1), new Float(0.02f)));
+		accel.setModel(new SpinnerNumberModel(new Float(0.01f), new Float(0), new Float(1), new Float(0.01f)));
 		((JSpinner.DefaultEditor)accel.getEditor()).getTextField().setColumns(3);
 		springLayout.putConstraint(SpringLayout.NORTH, lblMaxAcceleration, 3, SpringLayout.NORTH, accel);
 		springLayout.putConstraint(SpringLayout.NORTH, accel, 6, SpringLayout.SOUTH, sep);
@@ -89,7 +87,7 @@ public class BotSettings extends JPanel {
 		settings.add(accel);
 		
 		deccel = new JSpinner();
-		deccel.setModel(new SpinnerNumberModel(new Float(-0.2f), new Float(-1), new Float(0), new Float(0.02f)));
+		deccel.setModel(new SpinnerNumberModel(new Float(-0.02f), new Float(-1), new Float(0), new Float(0.01f)));
 		((JSpinner.DefaultEditor)deccel.getEditor()).getTextField().setColumns(3);
 		springLayout.putConstraint(SpringLayout.NORTH, lblMaxDecceleration, 3, SpringLayout.NORTH, deccel);
 		springLayout.putConstraint(SpringLayout.NORTH, deccel, 6, SpringLayout.SOUTH, accel);

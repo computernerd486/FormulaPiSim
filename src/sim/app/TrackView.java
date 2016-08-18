@@ -24,6 +24,9 @@ import java.util.TimerTask;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -494,41 +497,40 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		float m1 = bot.p_m1, m2 = bot.p_m2;
 		float r,g;
 		
-		r = (m1 < 0) ? 1 : 0;
-		g = (m1 > 0) ? 1 : 0;
+		float[] c_pos = {1, 1, 0};
+		float[] c_act = {0, .76f, 1};
+				
+		c_pos[0] = r = (m1 < 0) ? 1 : 0;;
+		c_pos[1] = g = (m1 > 0) ? 1 : 0;
+		
 		gl2.glBegin(GL2.GL_QUADS);
 		{
-			if (m1 >= 0) {
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, (40 * m1));
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, (40 * m1));
-			} else {
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-41, (40 * m1));
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(-47, (40 * m1));
-			}
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(-39, (40 * Math.min(bot.m1.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(-49, (40 * Math.min(bot.m1.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(-49, (40 * Math.max(bot.m1.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(-39, (40 * Math.max(bot.m1.spd_act, 0)));
 
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(-41, (40 * Math.min(bot.m1.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(-47, (40 * Math.min(bot.m1.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(-47, (40 * Math.max(bot.m1.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(-41, (40 * Math.max(bot.m1.spd_sig, 0)));
 		}
 		gl2.glEnd();
 		
-		r = (m2 < 0) ? 1 : 0;
-		g = (m2 > 0) ? 1 : 0;
+		c_pos[0] = r = (m1 < 0) ? 1 : 0;;
+		c_pos[1] = g = (m1 > 0) ? 1 : 0;
+		
 		gl2.glBegin(GL2.GL_QUADS);
 		{
-			if (m2 < 0) {
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, (40 * m2));
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, (40 * m2));
-			} else {
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, 0);
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(41, (40 * m2));
-				gl2.glColor4f(r, g, 0, 1); gl2.glVertex2d(47, (40 * m2));
-			}
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(39, (40 * Math.max(bot.m2.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(49, (40 * Math.max(bot.m2.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(49, (40 * Math.min(bot.m2.spd_act, 0)));
+			gl2.glColor3fv(c_act, 0); gl2.glVertex2d(39, (40 * Math.min(bot.m2.spd_act, 0)));
 
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(41, (40 * Math.max(bot.m2.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(47, (40 * Math.max(bot.m2.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(47, (40 * Math.min(bot.m2.spd_sig, 0)));
+			gl2.glColor3fv(c_pos, 0); gl2.glVertex2d(41, (40 * Math.min(bot.m2.spd_sig, 0)));
 		}
 		gl2.glEnd();
 		
@@ -637,6 +639,27 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				bot.position = new Point2D(start.p.x, start.p.y);
 				bot.setDirection( 180f);
 
+			}
+		});
+		
+		bs.accel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				float accel = (float)bs.accel.getValue();
+				bot.m1.accel_rate = accel;
+				bot.m2.accel_rate = accel;
+			}
+		});
+		
+		bs.deccel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				float deccel = (float)bs.deccel.getValue();
+				bot.m1.deccel_rate = deccel;
+				bot.m2.deccel_rate = deccel;
+				
 			}
 		});
 	}
