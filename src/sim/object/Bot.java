@@ -41,6 +41,8 @@ public class Bot {
 	public float bot_bound_width = 18f;
 	public float bot_bound_length = 19f;
 	
+	public Motor m1, m2;
+	
 	public Bot()
 	{
 		this(new Point2D(0,0));
@@ -61,6 +63,9 @@ public class Bot {
 		this.speed = 2f;
 		this.p_m1 = 0f;
 		this.p_m2 = 0f;
+		
+		m1 = new Motor();
+		m2 = new Motor();
 		
 		setDirection(angle);
 	}
@@ -91,13 +96,20 @@ public class Bot {
 	public void move()
 	{		
 		//m1 is left, m2 is right
-		float velocityR = m_dist_peroid * p_m2;
-		float velocityL = m_dist_peroid * p_m1;
+		m1.spd_sig = p_m1;
+		m2.spd_sig = p_m2;
+		m1.tick();
+		m2.tick();
+		
+		//System.out.println(m1 + " " + m2);
+		
+		float velocityR = m_dist_peroid * m2.spd_act;
+		float velocityL = m_dist_peroid * m1.spd_act;
 		
 		float angle = (float) Math.toRadians(direction);
 		angle += (velocityR - velocityL) / (bot_radius * 2);
-		position.x += 0.5 * (velocityR + velocityL) * Math.cos(angle);
-		position.y += 0.5 * (velocityR + velocityL) * Math.sin(angle);
+		position.x += (0.5 * (velocityR + velocityL)) * Math.cos(angle);
+		position.y += (0.5 * (velocityR + velocityL)) * Math.sin(angle);
 		//System.out.println(velocityL + " : " + velocityR);
 		//System.out.println(angle + " : [" + position.x + "," + position.y + "]");
 		

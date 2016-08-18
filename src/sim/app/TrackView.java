@@ -145,7 +145,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
 		
-		tr = new TextRenderer(new Font("SansSerif", Font.PLAIN, 24));
+		tr = new TextRenderer(new Font("SansSerif", Font.PLAIN, 16));
 		
 		try {
 			videoStream = new RTSPStreamer(30, new Dimension(640, 480));
@@ -290,11 +290,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
-			gl2.glOrtho(0, 500, 0, 400, -1, 1);
+			gl2.glOrtho(0, glcanvas.getWidth(), 0, glcanvas.getHeight(), -1, 1);
 			
-			tr.beginRendering(500, 400);
+			tr.beginRendering(glcanvas.getWidth(), glcanvas.getHeight());
 			tr.setColor(1f, 1f, 1f, .6f);
-			tr.draw("ALPHA RELEASE - NOT FOR DISTRIBUTION", 5, 200);
+			tr.draw("BETA RELEASE - 0.2.0", 5, 10);
 			tr.endRendering();
 		}
 
