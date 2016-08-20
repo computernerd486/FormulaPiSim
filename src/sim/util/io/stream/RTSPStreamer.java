@@ -37,8 +37,10 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import sim.object.Bot;
 
 /**
- * This is going to be an odd class, it'll kick off an http/rtsp server
- * and start streaming the video to that.
+ * This should be renamed HTTP Streamer, but anyway, it serves up an image of the first person view,
+ * png format, for the request. Also in the request, it accepts speed for motor 1 and motor 2, 
+ * adjusting the requested speed for the bot with those values.
+ *
  */
 public class RTSPStreamer extends VideoStreamer {
 
@@ -126,7 +128,7 @@ public class RTSPStreamer extends VideoStreamer {
 		                 }
 		             });
 		            
-		             b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
+		             b.childOption(ChannelOption.SO_KEEPALIVE, false); // (6)
 		             b.childOption(ChannelOption.TCP_NODELAY, true);
 		
 		            // Bind and start to accept incoming connections.
@@ -168,7 +170,7 @@ public class RTSPStreamer extends VideoStreamer {
 				DefaultHttpRequest request = (DefaultHttpRequest)msg;
 				String uri = request.uri();
 				
-				System.out.println("Client received: " + msg.toString()); //msg.toString(CharsetUtil.UTF_8));
+				//System.out.println("Client received: " + msg.toString()); //msg.toString(CharsetUtil.UTF_8));
 				
 				//Speed Updation from request call
 				if (uri.contains("m1") && uri.contains("m2"))
@@ -176,7 +178,7 @@ public class RTSPStreamer extends VideoStreamer {
 					QueryStringDecoder decoder = new QueryStringDecoder(uri);
 					String m1 = decoder.parameters().get("m1").get(0);
 					String m2 = decoder.parameters().get("m2").get(0);
-					System.out.println(m1 + " : " + m2);
+					//System.out.println(m1 + " : " + m2);
 					
 					try {
 						Float m1_spd = null, m2_spd = null;
@@ -191,8 +193,9 @@ public class RTSPStreamer extends VideoStreamer {
 						if (m2_spd != null) bot.p_m2 = m2_spd;
 						
 					} catch (Exception e) {
-						System.err.println("Unable to parse speeds");
-						e.printStackTrace(System.err);
+						System.err.print("Unable to parse speeds: ");
+						System.err.println(uri);
+						//e.printStackTrace(System.err);
 					}
 				}
 			}
@@ -217,6 +220,7 @@ public class RTSPStreamer extends VideoStreamer {
 		@Override
 		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 			ctx.flush();
+			ctx.close();
 		}
 		
 		@Override

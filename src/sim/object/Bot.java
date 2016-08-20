@@ -10,6 +10,10 @@ public class Bot {
 
 	//Remember all dimensions are 1cm = 1unit
 	
+	//I know i'll get flack about public variables, its a bad idea for enterprise software
+	//but this is being done for speed, stack push/pop takes cpu cycles which would be better
+	//suited to keeping the framerate up
+	
 	public Point2D dimensions;
 	public Point2D position;
 	public Point3D focus;
@@ -25,7 +29,7 @@ public class Bot {
 	public float tyre_circ = (float) (Math.PI * tyre_diameter);
 	
 	public float m_ref_volt = 6f;
-	public float m_run_volt = 8.2f;
+	public float m_run_volt = 6.7f;
 	
 	public float m_ref_rpm = 180f;
 	public float m_run_rpm = (m_run_volt / m_ref_volt) * m_ref_rpm;

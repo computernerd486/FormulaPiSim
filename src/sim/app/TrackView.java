@@ -31,12 +31,15 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import com.jogamp.opengl.util.GLPixelBuffer;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -64,9 +67,12 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
+	private static final String VERSION = "BETA RELEASE - 0.2.1";
+	
 	//OpenGL objects
 	Animator anim;
 	GLCanvas glcanvas;
+	GLOffscreenAutoDrawable fpbuffer;
 	GLU glu;
 	
 	//Easy access size definitions for the main breaks of the screen
@@ -127,7 +133,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		GLCapabilities capabilities = new GLCapabilities(GLProfile.getDefault());
 		glcanvas = new GLCanvas(capabilities);
 		glcanvas.addGLEventListener(this);
-		
+						
 		anim = new Animator(glcanvas);
 		anim.setUpdateFPSFrames(10, null);
 		anim.start();
@@ -297,7 +303,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			tr.beginRendering(glcanvas.getWidth(), glcanvas.getHeight());
 			tr.setColor(1f, 1f, 1f, .6f);
-			tr.draw("BETA RELEASE - 0.2.0", 5, 10);
+			tr.draw(VERSION, 8, 10);
 			tr.endRendering();
 		}
 
@@ -636,6 +642,10 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				TrackNode start = track.nodes[0];
 				bot.p_m1 = 0f;
 				bot.p_m2 = 0f;
+				bot.m1.spd_act = 0f;
+				bot.m1.spd_sig = 0f;
+				bot.m2.spd_act = 0f;
+				bot.m2.spd_sig = 0f;
 				bot.position = new Point2D(start.p.x, start.p.y);
 				bot.setDirection( 180f);
 
