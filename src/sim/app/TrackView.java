@@ -31,7 +31,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
@@ -39,7 +38,6 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
-import com.jogamp.opengl.util.GLPixelBuffer;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -523,8 +521,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 		gl2.glEnd();
 		
-		c_pos[0] = r = (m1 < 0) ? 1 : 0;;
-		c_pos[1] = g = (m1 > 0) ? 1 : 0;
+		c_pos[0] = r = (m2 < 0) ? 1 : 0;;
+		c_pos[1] = g = (m2 > 0) ? 1 : 0;
 		
 		gl2.glBegin(GL2.GL_QUADS);
 		{

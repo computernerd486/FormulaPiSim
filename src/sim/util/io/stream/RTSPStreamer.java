@@ -128,7 +128,7 @@ public class RTSPStreamer extends VideoStreamer {
 		                 }
 		             });
 		            
-		             b.childOption(ChannelOption.SO_KEEPALIVE, false); // (6)
+		             b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 		             b.childOption(ChannelOption.TCP_NODELAY, true);
 		
 		            // Bind and start to accept incoming connections.
