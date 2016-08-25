@@ -13,8 +13,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 
 public class BotSettings extends JPanel {
 
@@ -23,6 +25,10 @@ public class BotSettings extends JPanel {
 	public JButton bot_reset;
 	public JSpinner accel;
 	public JSpinner deccel;
+	public JSpinner refVoltage;
+	public JSpinner refRPM;
+	public JSpinner maxVoltage;
+	public JTextField maxRPM;
 	
 	public BotSettings () {
 		initialize();
@@ -74,9 +80,25 @@ public class BotSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.WEST, lblMaxAcceleration, 6, SpringLayout.WEST, sep);
 		settings.add(lblMaxAcceleration);
 		
-		JLabel lblMaxDecceleration = new JLabel("Max Deccel %/20ms");
+		JLabel lblMaxDecceleration = new JLabel("Max Decel %/20ms");
 		springLayout.putConstraint(SpringLayout.WEST, lblMaxDecceleration, 6, SpringLayout.WEST, sep);
 		settings.add(lblMaxDecceleration);
+		
+		JLabel lblReferenceVoltage = new JLabel("Reference Voltage:");
+		springLayout.putConstraint(SpringLayout.WEST, lblReferenceVoltage, 6, SpringLayout.WEST, sep);
+		settings.add(lblReferenceVoltage);
+		
+		JLabel lblReferenceRpm = new JLabel("Reference RPM");
+		springLayout.putConstraint(SpringLayout.WEST, lblReferenceRpm, 6, SpringLayout.WEST, sep);
+		settings.add(lblReferenceRpm);
+		
+		JLabel lblRunningVoltage = new JLabel("Max Voltage");
+		springLayout.putConstraint(SpringLayout.WEST, lblRunningVoltage, 6, SpringLayout.WEST, sep);
+		settings.add(lblRunningVoltage);
+		
+		JLabel lblMaxRPM = new JLabel("Max RPM");
+		springLayout.putConstraint(SpringLayout.WEST, lblMaxRPM, 6, SpringLayout.WEST, sep);
+		settings.add(lblMaxRPM);	
 		
 		accel = new JSpinner();
 		accel.setModel(new SpinnerNumberModel(new Float(0.01f), new Float(0), new Float(1), new Float(0.01f)));
@@ -93,6 +115,39 @@ public class BotSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.NORTH, deccel, 6, SpringLayout.SOUTH, accel);
 		springLayout.putConstraint(SpringLayout.EAST, deccel, 0, SpringLayout.EAST, panel);
 		settings.add(deccel);
+				
+		refVoltage = new JSpinner();
+		refVoltage.setModel(new SpinnerNumberModel(new Float(6.0f), new Float(0), new Float(12), new Float(0.1f)));
+		((JSpinner.DefaultEditor)refVoltage.getEditor()).getTextField().setColumns(3);
+		springLayout.putConstraint(SpringLayout.NORTH, lblReferenceVoltage, 3, SpringLayout.NORTH, refVoltage);
+		springLayout.putConstraint(SpringLayout.NORTH, refVoltage, 6, SpringLayout.SOUTH, deccel);
+		springLayout.putConstraint(SpringLayout.EAST, refVoltage, 0, SpringLayout.EAST, panel);
+		settings.add(refVoltage);
+				
+		refRPM = new JSpinner();
+		refRPM.setModel(new SpinnerNumberModel(new Float(180), new Float(0), new Float(500), new Float(10f)));
+		((JSpinner.DefaultEditor)refRPM.getEditor()).getTextField().setColumns(3);
+		springLayout.putConstraint(SpringLayout.NORTH, lblReferenceRpm, 3, SpringLayout.NORTH, refRPM);
+		springLayout.putConstraint(SpringLayout.NORTH, refRPM, 6, SpringLayout.SOUTH, refVoltage);
+		springLayout.putConstraint(SpringLayout.EAST, refRPM, 0, SpringLayout.EAST, panel);
+		settings.add(refRPM);
+				
+		maxVoltage = new JSpinner();
+		maxVoltage.setModel(new SpinnerNumberModel(new Float(8.7f), new Float(0), new Float(18), new Float(0.1f)));
+		((JSpinner.DefaultEditor)maxVoltage.getEditor()).getTextField().setColumns(3);
+		springLayout.putConstraint(SpringLayout.NORTH, lblRunningVoltage, 3, SpringLayout.NORTH, maxVoltage);
+		springLayout.putConstraint(SpringLayout.NORTH, maxVoltage, 6, SpringLayout.SOUTH, refRPM);
+		springLayout.putConstraint(SpringLayout.EAST, maxVoltage, 0, SpringLayout.EAST, panel);
+		settings.add(maxVoltage);
+		
+		maxRPM = new JTextField();
+		maxRPM.setEditable(false);
+		maxRPM.setColumns(5);
+		maxRPM.setHorizontalAlignment(SwingConstants.TRAILING);
+		springLayout.putConstraint(SpringLayout.NORTH, lblMaxRPM, 3, SpringLayout.NORTH, maxRPM);
+		springLayout.putConstraint(SpringLayout.NORTH, maxRPM, 6, SpringLayout.SOUTH, maxVoltage);
+		springLayout.putConstraint(SpringLayout.EAST, maxRPM, 0, SpringLayout.EAST, panel);
+		settings.add(maxRPM);
 
 		container.add(settings);	
 	}

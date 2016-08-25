@@ -4,6 +4,13 @@
 
 package sim.object;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
+import java.util.prefs.Preferences;
+
 import sim.util.*;
 
 public class Bot {
@@ -14,13 +21,14 @@ public class Bot {
 	//but this is being done for speed, stack push/pop takes cpu cycles which would be better
 	//suited to keeping the framerate up
 	
+	public static String PROPERTIES_FILE = "settings/bot.conf";
+	
 	public Point2D dimensions;
 	public Point2D position;
 	public Point3D focus;
 	public float height;
 	
 	public float direction;
-	public float speed;
 	
 	public float p_m1, p_m2;
 	
@@ -64,7 +72,6 @@ public class Bot {
 		this.dimensions = new Point2D(bot_bound_length, bot_bound_width);
 		this.position = start;
 		this.height = 4.15f;
-		this.speed = 2f;
 		this.p_m1 = 0f;
 		this.p_m2 = 0f;
 		
@@ -72,6 +79,53 @@ public class Bot {
 		m2 = new Motor();
 		
 		setDirection(angle);
+		
+		loadProperties();
+	}
+	
+	private void loadProperties() {
+		Properties props = new Properties();
+		
+		try {
+			BufferedReader br = Files.newBufferedReader(Paths.get(PROPERTIES_FILE));
+			props.load(br);
+			br.close();
+			
+			System.out.println("Bot Settings:");
+			for (Object key : props.keySet()) {
+				System.out.println(key + " : " + props.getProperty((String) key));
+			}
+			System.out.println();
+					
+			tyre_diameter 	= Float.parseFloat(props.getProperty("tyre_diameter", "8.4"));
+			m_ref_volt 		= Float.parseFloat(props.getProperty("motor_ref_volt", "6"));
+			m_run_volt 		= Float.parseFloat(props.getProperty("motor_max_volt", "6.7"));
+			m_ref_rpm 		= Float.parseFloat(props.getProperty("motor_ref_rpm", "180"));
+			bot_width 		= Float.parseFloat(props.getProperty("body_width", "8.4"));
+			tyre_width 		= Float.parseFloat(props.getProperty("tyre_width", "4.2"));
+			
+			bot_bound_width = Float.parseFloat(props.getProperty("bound_width", "18"));
+			bot_bound_length = Float.parseFloat(props.getProperty("bount_length", "19"));
+			
+			m1.accel_rate = m2.accel_rate = Float.parseFloat(props.getProperty("motor_accel", "0.01"));
+			m1.decel_rate = m2.decel_rate = Float.parseFloat(props.getProperty("motor_decel", "-0.002"));
+			
+			recalc();
+			
+		} catch ( Exception e) {
+			System.err.println("Unable to load properties for Bot");
+		}
+	}
+	
+	public void recalc() {
+
+		tyre_radius = tyre_diameter / 2f;
+		tyre_circ = (float) (Math.PI * tyre_diameter);
+
+		m_run_rpm = (m_run_volt / m_ref_volt) * m_ref_rpm;
+		m_dist_peroid = tyre_circ * (m_run_rpm / (60f * 1000f) * update_period);
+
+		bot_radius = (bot_width / 2) + (tyre_width / 2); 	
 	}
 	
 	/**

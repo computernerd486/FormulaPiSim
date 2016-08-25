@@ -19,6 +19,7 @@ public class Track {
 	static final double twoPi = 2 * Math.PI;
 
 	//Public variable for drawing
+	public IndicatorBar lights;
 	public TrackNode[] nodes;
 	public Float wallHeight;
 	public Point2D bounds;
@@ -72,6 +73,7 @@ public class Track {
 				points.add(new Point2D(Double.valueOf(coord[0]), Double.valueOf(coord[1])));
 			}
 			
+			lights = new IndicatorBar(points.get(3), radius);
 			
 		} catch (Exception e) {
 			System.err.println("Error loading file [" + file + "]:");

@@ -106,6 +106,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	FloatBuffer vertices_innerwall;
 	FloatBuffer vertices_outerwall;
 	
+	FloatBuffer vertices_indicator;
+	
 	//Counter variable, use to control how often the fps is printed
 	int framecounter = 0;
 	
@@ -147,8 +149,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		track.load(track_default);
 		
 		TrackNode start = track.nodes[0];
-		
 		bot = new Bot(new Point2D(start.p.x, start.p.y), 180f);
+		
+		bs.accel.setValue(bot.m1.accel_rate);
+		bs.deccel.setValue(bot.m1.decel_rate);
+		bs.refVoltage.setValue(bot.m_ref_volt);
+		bs.refRPM.setValue(bot.m_ref_rpm);
+		bs.maxVoltage.setValue(bot.m_run_volt);
+		bs.maxRPM.setText(String.valueOf(Math.round(bot.m_run_rpm)));
+		
 		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
 		
@@ -188,7 +197,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 	}
 	
-	public void loadTextures(GLAutoDrawable glautodrawable)
+	private void loadTextures(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glEnable(GL2.GL_CULL_FACE);
@@ -234,7 +243,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	}
 	
 	
-	public void draw(GLAutoDrawable glautodrawable){
+	private void draw(GLAutoDrawable glautodrawable){
 		
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glLineWidth(2);		
@@ -311,7 +320,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	/**
 	 * Sets up vertex buffers for rendering
 	 */
-	public void prepTrackBuffers()
+	private void prepTrackBuffers()
 	{
 		int nNodes = track.nodes.length;
 		TrackNode[] nodes = track.nodes;
@@ -361,13 +370,47 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		vertices_outerwall = vOuterWall;
 	}
 	
+	private void prepIndicatorBuffer(){
+		TrackNode nodes = track.nodes[6];
+		float height_over = 38f, height = 6f;
+		
+		FloatBuffer vLights = GLBuffers.newDirectFloatBuffer((16) * 3 * 2);
+		
+		//rememerber, the Y axis splits the track
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(0f);
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(0f);
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(height_over);
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over);
+		
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(height_over + height);
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over + height);
+		
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over);
+		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over + height);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over + height);
+		
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(height_over + height);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over + height);
+		
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(0f);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(0f);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(height_over);
+		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over);
+		
+		vLights.flip();
+		
+		vertices_indicator = vLights;
+	}
+	
 	/**
 	 * Uses the buffers setup in prepTrackBuffers to draw the track
 	 * @param glautodrawable
 	 */
-	public void drawTrack(GLAutoDrawable glautodrawable)
+	private void drawTrack(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
+		gl2.glClearDepthf(0f);
 		
 		TrackNode[] nodes = track.nodes;
 		int drawCount = (nodes.length + 1) * 2;
@@ -391,6 +434,10 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		}
 		
+		gl2.glColor3f(1f, .1f, .1f);
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_indicator);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, 16);
+		
 		//Set Color to black, and draw walls
 		gl2.glColor3f(.1f, .1f, .1f);
 		
@@ -407,7 +454,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	 * Draws the bot using fixed coordinates, no need for buffers
 	 * @param glautodrawable
 	 */
-	public void drawBot(GLAutoDrawable glautodrawable)
+	private void drawBot(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		
@@ -447,7 +494,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			tex_bot.disable(gl2);
 	}
 	
-	public void drawFirstPerson(GLAutoDrawable glautodrawable)
+	private void drawFirstPerson(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		drawTrack(glautodrawable);
@@ -462,7 +509,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
         }
 	}
 	
-	public void drawOverview(GLAutoDrawable glautodrawable) 
+	private void drawOverview(GLAutoDrawable glautodrawable) 
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		
@@ -665,11 +712,43 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				float deccel = (float)bs.deccel.getValue();
-				bot.m1.deccel_rate = deccel;
-				bot.m2.deccel_rate = deccel;
+				bot.m1.decel_rate = deccel;
+				bot.m2.decel_rate = deccel;
 				
 			}
 		});
+		
+		bs.refVoltage.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				bot.m_ref_volt = (float)bs.refVoltage.getValue();
+				bot.recalc();
+				bs.maxRPM.setText(String.valueOf(Math.round(bot.m_run_rpm)));
+			}
+		});
+		
+		bs.refRPM.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				bot.m_ref_rpm = (float)bs.refRPM.getValue();
+				bot.recalc();
+				bs.maxRPM.setText(String.valueOf(Math.round(bot.m_run_rpm)));
+			}
+		});
+		
+		bs.maxVoltage.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				bot.m_run_volt = (float)bs.maxVoltage.getValue();
+				bot.recalc();
+				bs.maxRPM.setText(String.valueOf(Math.round(bot.m_run_rpm)));
+			}
+		});
+		
+
 	}
 	
 	private void writeMemUsage()
@@ -725,6 +804,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public void init(GLAutoDrawable glautodrawable ) {
 		loadTextures(glautodrawable);
 		prepTrackBuffers();
+		prepIndicatorBuffer();
 	}
 	
 	@Override

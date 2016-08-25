@@ -4,7 +4,7 @@ public class Motor {
 	
 	//acceleration rate, percent/20ms
 	public float accel_rate = 0.01f;
-	public float deccel_rate = -0.02f;
+	public float decel_rate = -0.002f;
 
 	public float spd_sig;
 	public float spd_act;
@@ -15,7 +15,7 @@ public class Motor {
 	}
 	
 	public void tick() {
-		spd_act += Math.min(Math.max((spd_sig - spd_act), deccel_rate), accel_rate);
+		spd_act += Math.min(Math.max((spd_sig - spd_act), decel_rate), accel_rate);
 	}
 	
 	@Override
