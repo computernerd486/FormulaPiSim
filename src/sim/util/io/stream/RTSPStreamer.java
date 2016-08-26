@@ -178,6 +178,7 @@ public class RTSPStreamer extends VideoStreamer {
 					QueryStringDecoder decoder = new QueryStringDecoder(uri);
 					String m1 = decoder.parameters().get("m1").get(0);
 					String m2 = decoder.parameters().get("m2").get(0);
+
 					//System.out.println(m1 + " : " + m2);
 					
 					try {
@@ -197,6 +198,15 @@ public class RTSPStreamer extends VideoStreamer {
 						System.err.println(uri);
 						//e.printStackTrace(System.err);
 					}
+				}
+				
+				if (uri.contains("l1"))
+				{
+					QueryStringDecoder decoder = new QueryStringDecoder(uri);
+					String l1 = decoder.parameters().get("l1").get(0);
+					
+					if (l1 != null && !"".equals(l1))
+						bot.light = "1".equals(l1);
 				}
 			}
 			

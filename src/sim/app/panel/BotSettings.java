@@ -50,7 +50,7 @@ public class BotSettings extends JPanel {
 		settings.setLayout(springLayout);
 		
 		JPanel panel = new JPanel();
-		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.NORTH, settings);
+		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.NORTH, container);
 		springLayout.putConstraint(SpringLayout.WEST, panel, 10, SpringLayout.WEST, settings);
 		springLayout.putConstraint(SpringLayout.EAST, panel, -10, SpringLayout.EAST, settings);
 		settings.add(panel);

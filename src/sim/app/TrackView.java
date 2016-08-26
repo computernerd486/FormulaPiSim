@@ -43,6 +43,7 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import sim.app.panel.BotSettings;
+import sim.app.panel.StartSettings;
 import sim.app.panel.VideoSettings;
 import sim.object.*;
 import sim.util.*;
@@ -116,6 +117,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	//Settings Panels
 	VideoSettings vs;
+	StartSettings ss;
 	BotSettings bs;
 	
 	//For Drawing opengl text
@@ -158,6 +160,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		bs.refRPM.setValue(bot.m_ref_rpm);
 		bs.maxVoltage.setValue(bot.m_run_volt);
 		bs.maxRPM.setText(String.valueOf(Math.round(bot.m_run_rpm)));
+		
+		for (int i = 1; i <= track.lanes; i++) {
+			ss.lane.addItem(i);
+		}
+		ss.lane.setSelectedIndex(Math.round(track.lanes / 2));
 		
 		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
@@ -272,7 +279,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glScissor(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			
 			gl2.glClearColor(.8f, .8f, .8f, 1.0f);
-			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			
 			gl2.glLoadIdentity();
 			
@@ -586,6 +593,24 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 		gl2.glEnd();
 		
+		gl2.glPointSize(12);
+		gl2.glBegin(GL2.GL_POINTS);
+		{
+			gl2.glColor3f(0f, 0f, 0f);
+			gl2.glVertex3f(10, -20, 0.1f);
+		}
+		gl2.glEnd();
+		
+		if (bot.light) {
+			gl2.glPointSize(8);
+			gl2.glBegin(GL2.GL_POINTS);
+			{
+				gl2.glColor3f(0f, 1f, 0f);
+				gl2.glVertex3f(10, -20, 0.1f);
+			}
+			gl2.glEnd();
+		}
+		
 		gl2.glTranslatef(-50, -50, 0f);
 		gl2.glPopMatrix();
 		
@@ -599,20 +624,16 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		p.setPreferredSize(new Dimension(settings_width, height));
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		
-		//SpringLayout springLayout = new SpringLayout();
-		//p.setLayout(springLayout);
+
 		this.getContentPane().add(p, BorderLayout.EAST);
 	
 		vs = new VideoSettings();
-		//springLayout.putConstraint(SpringLayout.WEST, vs, 0, SpringLayout.WEST, p);
-		//springLayout.putConstraint(SpringLayout.EAST, vs, 0, SpringLayout.EAST, p);
 		p.add(vs);
 		
+		ss = new StartSettings();
+		p.add(ss);
 		
 		bs = new BotSettings();
-		//springLayout.putConstraint(SpringLayout.NORTH, bs, 100, SpringLayout.SOUTH, vs);
-		//springLayout.putConstraint(SpringLayout.WEST, bs, 0, SpringLayout.WEST, p);
-		//springLayout.putConstraint(SpringLayout.EAST, bs, 0, SpringLayout.EAST, p);
 		p.add(bs);
 	}
 
@@ -685,14 +706,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		bs.bot_reset.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				TrackNode start = track.nodes[0];
+				Point2D start = track.startPositions[ss.lane.getSelectedIndex()];
 				bot.p_m1 = 0f;
 				bot.p_m2 = 0f;
 				bot.m1.spd_act = 0f;
 				bot.m1.spd_sig = 0f;
 				bot.m2.spd_act = 0f;
 				bot.m2.spd_sig = 0f;
-				bot.position = new Point2D(start.p.x, start.p.y);
+				bot.position = new Point2D(start.x, start.y);
 				bot.setDirection( 180f);
 
 			}
@@ -749,6 +770,39 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
+		ss.lightsOff.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ss.lightsOff.setEnabled(false);
+				ss.lightsGreen.setEnabled(true);
+				ss.lightsRed.setEnabled(true);
+				track.lights.status = IndicatorBar.Status.OFF;
+			}
+		});
+		
+		ss.lightsGreen.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ss.lightsOff.setEnabled(true);
+				ss.lightsGreen.setEnabled(false);
+				ss.lightsRed.setEnabled(true);
+				track.lights.status = IndicatorBar.Status.GREEN;
+				
+			}
+		});
+		
+		ss.lightsRed.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ss.lightsOff.setEnabled(true);
+				ss.lightsGreen.setEnabled(true);
+				ss.lightsRed.setEnabled(false);
+				track.lights.status = IndicatorBar.Status.RED;
+			}
+		});
 
 	}
 	

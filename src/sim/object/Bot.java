@@ -54,6 +54,7 @@ public class Bot {
 	public float bot_bound_length = 19f;
 	
 	public Motor m1, m2;
+	public boolean light;
 	
 	public Bot()
 	{
@@ -74,6 +75,7 @@ public class Bot {
 		this.height = 4.15f;
 		this.p_m1 = 0f;
 		this.p_m2 = 0f;
+		this.light = false;
 		
 		m1 = new Motor();
 		m2 = new Motor();
