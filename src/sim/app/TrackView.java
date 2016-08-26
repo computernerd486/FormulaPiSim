@@ -148,8 +148,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		track = new Track();
 		track.load(track_default);
 		
-		TrackNode start = track.nodes[0];
-		bot = new Bot(new Point2D(start.p.x, start.p.y), 180f);
+		//TrackNode start = track.nodes[0];
+		Point2D start = track.startPositions[Math.round(track.lanes / 2)];
+		bot = new Bot(new Point2D(start.x, start.y), 180f);
 		
 		bs.accel.setValue(bot.m1.accel_rate);
 		bs.deccel.setValue(bot.m1.decel_rate);

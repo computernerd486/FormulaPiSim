@@ -23,6 +23,10 @@ public class Track {
 	public TrackNode[] nodes;
 	public Float wallHeight;
 	public Point2D bounds;
+	public Point2D[] startPositions;
+	public Float lightX;
+	public Float startX;
+	public int lanes;
 
 	//Private for internal processesing
 	String filename;
@@ -66,14 +70,28 @@ public class Track {
 					continue;
 				}
 				
+				if (line.startsWith("START_LINE:")) {
+					startX = Float.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+				
+				if (line.startsWith("LIGHTS:")) {
+					lightX = Float.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+				
+				if (line.startsWith("LANES:")) {
+					lanes = Integer.valueOf(line.substring(line.indexOf(':') + 1));
+					continue;
+				}
+			
 				if (line.matches("^[a-zA-Z](.*)"))
 					continue;
 				
 				String[] coord = line.split(",");
 				points.add(new Point2D(Double.valueOf(coord[0]), Double.valueOf(coord[1])));
+				
 			}
-			
-			lights = new IndicatorBar(points.get(3), radius);
 			
 		} catch (Exception e) {
 			System.err.println("Error loading file [" + file + "]:");
@@ -90,6 +108,15 @@ public class Track {
 
 			double t_ab = getSplitTheta(p0, p1, p2);
 			nodes[i] = new TrackNode(offsetPoint(p1, radius, t_ab), p1, offsetPoint(p1, -radius, t_ab));
+		}
+		
+		lights = new IndicatorBar(new Point2D(lightX, nodes[0].p.y), radius);
+		float lane_width = (radius * 2f) / (lanes + 1f);
+		startPositions = new Point2D[lanes];
+		
+		for (int l = 1; l <= lanes; l++) {
+			startPositions[l - 1] = new Point2D(startX, nodes[0].b.y + (l * lane_width));
+			System.out.println("Start [" + l + "] : " + startPositions[l - 1]);
 		}
 	}
 	
