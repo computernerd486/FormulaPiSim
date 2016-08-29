@@ -107,8 +107,6 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	FloatBuffer vertices_innerwall;
 	FloatBuffer vertices_outerwall;
 	
-	FloatBuffer vertices_indicator;
-	
 	//Counter variable, use to control how often the fps is printed
 	int framecounter = 0;
 	
@@ -263,7 +261,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glScissor(glcanvas.getWidth() - view_width_overhead, 0, view_width_overhead, view_height_overhead);
 			gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			gl2.glColor3f(1f, 1f, 1f);
-			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
@@ -298,7 +296,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glScissor(view_width_firstperson, height - 200, 200, 200);
 			gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			gl2.glColor3f(1f, 1f, 1f);
-			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
@@ -377,40 +375,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		vertices_innerwall = vInnerWall;
 		vertices_outerwall = vOuterWall;
 	}
-	
-	private void prepIndicatorBuffer(){
-		TrackNode nodes = track.nodes[6];
-		float height_over = 38f, height = 6f;
 		
-		FloatBuffer vLights = GLBuffers.newDirectFloatBuffer((16) * 3 * 2);
-		
-		//rememerber, the Y axis splits the track
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(0f);
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(0f);
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(height_over);
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over);
-		
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y + height).put(height_over + height);
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over + height);
-		
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over);
-		vLights.put((float)nodes.a.x).put((float)nodes.a.y).put(height_over + height);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over + height);
-		
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(height_over + height);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over + height);
-		
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(0f);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(0f);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y - height).put(height_over);
-		vLights.put((float)nodes.b.x).put((float)nodes.b.y).put(height_over);
-		
-		vLights.flip();
-		
-		vertices_indicator = vLights;
-	}
-	
 	/**
 	 * Uses the buffers setup in prepTrackBuffers to draw the track
 	 * @param glautodrawable
@@ -442,9 +407,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		}
 		
-		gl2.glColor3f(1f, .1f, .1f);
-		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_indicator);
-		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, 16);
+		track.lights.draw(glautodrawable);
 		
 		//Set Color to black, and draw walls
 		gl2.glColor3f(.1f, .1f, .1f);
@@ -859,7 +822,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public void init(GLAutoDrawable glautodrawable ) {
 		loadTextures(glautodrawable);
 		prepTrackBuffers();
-		prepIndicatorBuffer();
+		track.lights.prepIndicatorBuffer();
 	}
 	
 	@Override
