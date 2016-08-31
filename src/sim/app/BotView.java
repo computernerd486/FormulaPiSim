@@ -49,7 +49,12 @@ public class BotView extends JFrame implements KeyListener {
 	Texture view;
 	
 	public float step_speed = .05f; //5 percent increase
-	public float step_angle = 5f;	
+	public float step_angle = .01f;	
+	
+	float velocity = 0f;
+	float angle = 0f;
+	
+	float o_error = 0;
 	
 	boolean running = false;
 	
@@ -178,10 +183,10 @@ public class BotView extends JFrame implements KeyListener {
 		{
 			switch (e.getKeyCode())
 			{
-			case KeyEvent.VK_LEFT: bot.direction += step_angle; break;
-			case KeyEvent.VK_RIGHT: bot.direction -= step_angle; break;
-			case KeyEvent.VK_UP: bot.p_m1 = Math.min(bot.p_m1 + step_speed, 1f); break;
-			case KeyEvent.VK_DOWN: bot.p_m1 = Math.max(bot.p_m1 - step_speed, -1f); break;
+			case KeyEvent.VK_LEFT: angle += step_angle; break;
+			case KeyEvent.VK_RIGHT: angle -= step_angle; break;
+			case KeyEvent.VK_UP: velocity = Math.min(velocity + step_speed, 1f); break;
+			case KeyEvent.VK_DOWN: velocity = Math.max(velocity - step_speed, -1f); break;
 			case KeyEvent.VK_ENTER: running = !running; break;
 			}
 		}
@@ -233,20 +238,41 @@ public class BotView extends JFrame implements KeyListener {
 					int max_fix = 2;
 					
 					int half = camera_width / 2;
-					int diff = (int) (half - target.x);
+					int e = (int) (half - target.x);
 					
-					int max_deviation = 25;
-					float fix_percent =  diff/max_deviation;
-					float fix = (int) (Math.min(1f, fix_percent) * max_fix);
+					float kp = 0.001f, ki = 0.001f, kd = 0.0001f;
 					
-					bot.direction += fix;
+					float i = ki + e;
+					float d = (e - o_error);
+					angle = kp * e + ki * i + kd * d;
+					o_error = e;
+					
+					float adjust = angle = (float) Math.atan2(Math.sin(angle), Math.cos(angle));
+					//v = .5 * (vl + vr) / r
+					
+					bot.p_m1 = (float) (-Math.sin(adjust) + velocity);
+					bot.p_m2 = (float) (Math.sin(adjust) + velocity);
+					
+					/**
+					float velocityR = m_dist_peroid * m2.spd_act;
+					float velocityL = m_dist_peroid * m1.spd_act;
+					
+					float angle = (float) Math.toRadians(direction);
+					angle = (velocityR - velocityL) / (bot_radius * 2);
+					**/
+					
+					//int max_deviation = 25;
+					//float fix_percent =  diff/max_deviation;
+					//float fix = (int) (Math.min(1f, fix_percent) * max_fix);
+					
+					//bot.direction += fix;
 					
 					
-					float max_speed_change = -.15f;
-					float speed_diff = Math.max(-.05f, Math.min(.02f, (1 - fix_percent) * 2)) / .1f;
+					//float max_speed_change = -.15f;
+					//float speed_diff = Math.max(-.05f, Math.min(.02f, (1 - fix_percent) * 2)) / .1f;
 					
-					float speed_change = speed_diff * max_speed_change;
-					bot.p_m1 = Math.min(Math.max(bot.p_m1 - speed_change, -1f), 1f);
+					//float speed_change = speed_diff * max_speed_change;
+					//bot.p_m1 = Math.min(Math.max(bot.p_m1 - speed_change, -1f), 1f);
 					
 				}				
 			}

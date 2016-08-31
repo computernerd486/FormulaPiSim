@@ -66,7 +66,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String VERSION = "BETA RELEASE - 0.2.1";
+	private static final String VERSION = "BETA RELEASE - 0.2.2";
 	
 	//OpenGL objects
 	Animator anim;
@@ -206,9 +206,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	private void loadTextures(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
-		gl2.glEnable(GL2.GL_CULL_FACE);
-		gl2.glCullFace(GL2.GL_BACK);
-		gl2.glFrontFace(GL2.GL_CW);
+		//gl2.glEnable(GL2.GL_CULL_FACE);
+		//gl2.glCullFace(GL2.GL_NONE);
+		//gl2.glFrontFace(GL2.GL_CW);
 		
 		 try {
 			 Texture t;
@@ -406,19 +406,20 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			tex_trackRoad.disable(gl2);
 			gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		}
-		
-		track.lights.draw(glautodrawable);
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 		
 		//Set Color to black, and draw walls
 		gl2.glColor3f(.1f, .1f, .1f);
 		
-		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_innerwall);
-		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
+		track.lights.draw(glautodrawable);
 		
-		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_outerwall);
-		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
+		//gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_innerwall);
+		//gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
 		
-		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		//gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_outerwall);
+		//gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
+		
+		
 	}
 	
 	/**
@@ -822,11 +823,13 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public void init(GLAutoDrawable glautodrawable ) {
 		loadTextures(glautodrawable);
 		prepTrackBuffers();
-		track.lights.prepIndicatorBuffer();
+		track.lights.prepIndicatorBuffer(glautodrawable);
 	}
 	
 	@Override
-	public void dispose(GLAutoDrawable glautodrawable ) {}
+	public void dispose(GLAutoDrawable glautodrawable ) {
+		track.lights.cleanup(glautodrawable);
+	}
 	
 	@Override
 	public void display(GLAutoDrawable glautodrawable ) {
