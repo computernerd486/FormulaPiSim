@@ -18,9 +18,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -66,7 +63,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String VERSION = "BETA RELEASE - 0.2.2";
+	private static final String VERSION = "RELEASE - 1.0.1";
 	
 	//OpenGL objects
 	Animator anim;
@@ -172,7 +169,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		try {
 			videoStream = new RTSPStreamer(30, new Dimension(640, 480));
 			videoStream.video = botView;
-			((RTSPStreamer)videoStream).bot = bot;
+
+			RTSPStreamer stream = ((RTSPStreamer) videoStream);
+			stream.bot = bot;
+			stream.loadProperties();
+			
+			vs.resX.setText(String.valueOf(stream.size.width));
+			vs.resY.setText(String.valueOf(stream.size.height));
+			vs.port.setText(String.valueOf(stream.port));
 
 		} catch (Exception e) {
 			videoStream = null;
@@ -185,6 +189,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		this.addWindowListener(this);
 		this.pack();
 		
+		/**
 		Timer t = new Timer(true);
 		t.scheduleAtFixedRate(new TimerTask() {
 			
@@ -193,6 +198,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				writeMemUsage();
 			}
 		}, 0, 10000);
+		**/
 	}
 	
 	private void tearDown()
@@ -206,9 +212,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	private void loadTextures(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
-		//gl2.glEnable(GL2.GL_CULL_FACE);
-		//gl2.glCullFace(GL2.GL_NONE);
-		//gl2.glFrontFace(GL2.GL_CW);
+		gl2.glEnable(GL2.GL_CULL_FACE);
+		gl2.glCullFace(GL2.GL_NONE);
+		gl2.glFrontFace(GL2.GL_CW);
 		
 		 try {
 			 Texture t;
@@ -248,6 +254,19 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		 }
 	}
 	
+	private void setupLighting(GLAutoDrawable glautodrawable) {
+		
+		GL2 gl2 = glautodrawable.getGL().getGL2();
+		
+		float[] lightPos = { 2000,3000,2000,1 };        // light position
+		float[] noAmbient = { 0.2f, 0.2f, 0.2f, 1f };     // low ambient light
+		float[] diffuse = { 1f, 1f, 1f, 1f };        // full diffuse colour
+	    
+	    gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, noAmbient, 0);
+	    gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, diffuse, 0);
+	    gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0);
+	}
+	
 	
 	private void draw(GLAutoDrawable glautodrawable){
 		
@@ -261,11 +280,12 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glScissor(glcanvas.getWidth() - view_width_overhead, 0, view_width_overhead, view_height_overhead);
 			gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			gl2.glColor3f(1f, 1f, 1f);
+			gl2.glClearDepth(1.0f);
 			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
-			gl2.glOrtho(0, track.bounds.x, 0, track.bounds.y, -1, 1);
+			gl2.glOrtho(0, track.bounds.x, 0, track.bounds.y, -50, 50);
 			
 			drawTrack(glautodrawable);
 			drawBot(glautodrawable);
@@ -276,7 +296,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glViewport(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			gl2.glScissor(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson);
 			
+			gl2.glEnable(GL2.GL_DEPTH_TEST);
+			gl2.glDepthFunc(GL.GL_LEQUAL);
+			
 			gl2.glClearColor(.8f, .8f, .8f, 1.0f);
+			gl2.glClearDepth(1.0f);
 			gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			
 			gl2.glLoadIdentity();
@@ -288,6 +312,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 					0d, 0d, 1d);
 			
 			drawFirstPerson(glautodrawable);
+			
+			gl2.glDisable(GL2.GL_DEPTH_TEST);
+			
 		}
 		
 		//Bot overview for motor control
@@ -406,20 +433,20 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			tex_trackRoad.disable(gl2);
 			gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		}
-		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-		
+
 		//Set Color to black, and draw walls
 		gl2.glColor3f(.1f, .1f, .1f);
 		
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_innerwall);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
+		
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_outerwall);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
+
+		//Draw light bar
 		track.lights.draw(glautodrawable);
 		
-		//gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_innerwall);
-		//gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
-		
-		//gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_outerwall);
-		//gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
-		
-		
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 	}
 	
 	/**
@@ -673,6 +700,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				Point2D start = track.startPositions[ss.lane.getSelectedIndex()];
 				bot.p_m1 = 0f;
 				bot.p_m2 = 0f;
+				bot.light = false;
 				bot.m1.spd_act = 0f;
 				bot.m1.spd_sig = 0f;
 				bot.m2.spd_act = 0f;
@@ -822,8 +850,12 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	@Override
 	public void init(GLAutoDrawable glautodrawable ) {
 		loadTextures(glautodrawable);
+		track.lights.loadTextures(glautodrawable);
+		
 		prepTrackBuffers();
 		track.lights.prepIndicatorBuffer(glautodrawable);
+		
+		setupLighting(glautodrawable);
 	}
 	
 	@Override

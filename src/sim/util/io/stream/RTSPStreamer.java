@@ -8,7 +8,12 @@ package sim.util.io.stream;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
+
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
@@ -44,8 +49,11 @@ import sim.object.Bot;
  */
 public class RTSPStreamer extends VideoStreamer {
 
+	public static String PROPERTIES_FILE = "settings/server.conf";
+	
 	public boolean isRunning = false;
 	public int port;
+	public boolean autoStart = false;
 	
 	ServerBootstrap b;
 	EventLoopGroup workerGroup;
@@ -54,7 +62,6 @@ public class RTSPStreamer extends VideoStreamer {
 	Graphics2D g;
 	
 	public Bot bot;
-	
 	
 	public RTSPStreamer() {
 		super();
@@ -72,8 +79,37 @@ public class RTSPStreamer extends VideoStreamer {
 		super(fps, size);
 	}
 	
+	public void loadProperties() {
+		Properties props = new Properties();
+		
+		try {
+			BufferedReader br = Files.newBufferedReader(Paths.get(PROPERTIES_FILE));
+			props.load(br);
+			br.close();
+			
+			System.out.println("Video Stream Settings:");
+			for (Object key : props.keySet()) {
+				System.out.println(key + " : " + props.getProperty((String) key));
+			}
+			
+			System.out.println();
+			
+			String[] res = props.getProperty("res", "640x480").split("x");
+			size = new Dimension(Integer.parseInt(res[0]), Integer.parseInt(res[1]));
+			port = Integer.parseInt(props.getProperty("port", "10000"));
+			autoStart = Boolean.parseBoolean(props.getProperty("autostart"));
+			
+			
+		} catch (Exception e) {
+			System.err.println("Unable to read server settings file");
+			e.printStackTrace(System.err);
+		}
+				
+	}
+	
 	public void setupRTSPStreamer(Dimension size, int port) throws Exception
 	{
+		
 		if (!isRunning) {
 			this.out = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 			this.port = port;

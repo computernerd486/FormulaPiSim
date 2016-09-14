@@ -16,7 +16,7 @@ public abstract class VideoStreamer implements Runnable{
 	
 	protected Timer ticker;
 	protected int period;
-	protected Dimension size;
+	public Dimension size;
 	
 	
 	public VideoStreamer() { 
