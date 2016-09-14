@@ -93,6 +93,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public Bot bot;
 	BotUpdater botUpdater;
 	Track track;
+	LapTimer laptimer;
 	
 	//This is for output
 	public BufferedImage botView;
@@ -147,7 +148,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		//TrackNode start = track.nodes[0];
 		Point2D start = track.startPositions[Math.round(track.lanes / 2)];
-		bot = new Bot(new Point2D(start.x, start.y), 180f);
+		bot = new Bot(new Point2D(start.x + 8, start.y), 180f); //TODO: Set bot offset from half width.
+		laptimer = new LapTimer(track, bot);
+		
 		
 		bs.accel.setValue(bot.m1.accel_rate);
 		bs.deccel.setValue(bot.m1.decel_rate);
@@ -161,7 +164,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 		ss.lane.setSelectedIndex(Math.round(track.lanes / 2));
 		
-		botUpdater = new BotUpdater(bot);
+		botUpdater = new BotUpdater(bot, laptimer);
 		botUpdater.start();
 		
 		tr = new TextRenderer(new Font("SansSerif", Font.PLAIN, 16));
@@ -267,12 +270,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	    gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0);
 	}
 	
-	
+	private int TEXTOFFSET = 20;
 	private void draw(GLAutoDrawable glautodrawable){
 		
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glLineWidth(2);		
 		gl2.glEnable(GL2.GL_SCISSOR_TEST);
+		
+		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
 		
 		//Draw the overhead view
 		{
@@ -344,6 +350,21 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			tr.beginRendering(glcanvas.getWidth(), glcanvas.getHeight());
 			tr.setColor(1f, 1f, 1f, .6f);
 			tr.draw(VERSION, 8, 10);
+			
+			//So these need to be 20px diffrence
+			
+			int currentOffset = 0;
+			tr.draw("Laps:", 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			
+			for (int l = 0; l < laptimer.laps.size(); l++) { 
+				tr.draw(laptimer.laps.get(l).toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			}
+			
+			tr.draw("---------", 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			
+			if (laptimer.currentLap != null) {
+				tr.draw(laptimer.currentLap.toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			}
 			tr.endRendering();
 		}
 

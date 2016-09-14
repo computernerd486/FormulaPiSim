@@ -10,15 +10,18 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 
 import sim.object.Bot;
+import sim.object.LapTimer;
 
 public class BotUpdater{
 
 	private Bot bot;
 	private Timer timer;
+	private LapTimer laptimer;
 	
 	
-	public BotUpdater(Bot bot){
+	public BotUpdater(Bot bot, LapTimer laptimer){
 		this.bot = bot;
+		this.laptimer = laptimer;
 	}
 
 	public void start()
@@ -30,6 +33,9 @@ public class BotUpdater{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				bot.move();
+				if (laptimer != null)
+					laptimer.check();
+				
 				timer.restart();
 			}
 		});

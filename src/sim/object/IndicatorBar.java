@@ -153,7 +153,7 @@ public class IndicatorBar {
 		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices);
 		gl2.glDrawArrays(GL2.GL_QUADS, 4, 12);
 		
-		System.out.println(indicator.getRed() + " " + indicator.getGreen() + " " + indicator.getBlue());
+		//System.out.println(indicator.getRed() + " " + indicator.getGreen() + " " + indicator.getBlue());
 		gl2.glColor3ub((byte)indicator.getRed(), (byte)indicator.getGreen(), (byte)indicator.getBlue());
 		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices);
 		gl2.glDrawArrays(GL2.GL_QUADS, 16, 4);
