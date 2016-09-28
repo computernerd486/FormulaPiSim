@@ -11,6 +11,7 @@ import javax.swing.text.DateFormatter;
 import sim.util.Point2D;
 
 public class LapTimer {
+	static final int MAX_KEPT = 5;
 	
 	Bot bot;
 	Track track;
@@ -51,6 +52,11 @@ public class LapTimer {
 			if (currentLap != null) {
 				currentLap.stop();
 				laps.add(currentLap);
+				
+				if (laps.size() > MAX_KEPT) {
+					laps.remove(0);
+				}
+					
 			} 
 			
 			currentLap = new Lap();
