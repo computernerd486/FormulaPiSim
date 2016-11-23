@@ -12,12 +12,19 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -61,6 +68,15 @@ public class RTSPStreamer extends VideoStreamer {
 	BufferedImage out;
 	Graphics2D g;
 	
+	ByteArrayOutputStream baos;
+	ImageOutputStream ios;
+	ImageWriter imageWriter;
+	
+	byte[] buffer;
+	ByteBuf httpBuffer;
+	
+	Timer updateProcess;
+		
 	public Bot bot;
 	
 	public RTSPStreamer() {
@@ -109,12 +125,17 @@ public class RTSPStreamer extends VideoStreamer {
 	
 	public void setupRTSPStreamer(Dimension size, int port) throws Exception
 	{
+		baos = new ByteArrayOutputStream();   
+		ios = ImageIO.createImageOutputStream(baos);
+		
+		imageWriter = ImageIO.getImageWritersByFormatName("PNG").next();
+		imageWriter.setOutput(ios);			
 		
 		if (!isRunning) {
 			this.out = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 			this.port = port;
 			this.size = size;
-			
+		
 			g = (Graphics2D)out.getGraphics();
 			
 		} else {
@@ -136,6 +157,8 @@ public class RTSPStreamer extends VideoStreamer {
 		
 		if (isRunning) {
 			workerGroup.shutdownGracefully();
+			updateProcess.cancel();
+			
 			isRunning = false;
 		}
 	};
@@ -164,9 +187,9 @@ public class RTSPStreamer extends VideoStreamer {
 		                 }
 		             });
 		            
-		             b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
-		             b.childOption(ChannelOption.TCP_NODELAY, true);
-		
+		            b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
+		            b.childOption(ChannelOption.TCP_NODELAY, true);
+		            
 		            // Bind and start to accept incoming connections.
 		            ChannelFuture f = b.bind(port).sync(); // (7)
 		
@@ -184,11 +207,27 @@ public class RTSPStreamer extends VideoStreamer {
 		            workerGroup.shutdownGracefully();
 		        }
 			}
-		}.start();
+		}.start();		
+		
+		updateProcess = new Timer(true);
+		updateProcess.schedule(new UpdateBuffer(), 0, 30);
 	};
 
-
-			
+	class UpdateBuffer extends TimerTask implements Runnable {
+		@Override
+		public void run() {
+			try {
+				baos.reset();
+				imageWriter.write(out);
+				buffer = baos.toByteArray();
+				httpBuffer = Unpooled.wrappedBuffer(buffer);
+				
+			} catch (Exception e) {
+				System.err.println("Unable to create image buffer");
+				e.printStackTrace(System.err);
+			}
+		}
+	}
 	
 	class ResponseHandler extends ChannelInboundHandlerAdapter  {
 
@@ -199,7 +238,7 @@ public class RTSPStreamer extends VideoStreamer {
 		
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-			
+			super.channelRead(ctx, msg);
 			
 			if (msg instanceof DefaultHttpRequest)
 			{
@@ -245,28 +284,23 @@ public class RTSPStreamer extends VideoStreamer {
 						bot.light = "1".equals(l1);
 				}
 			}
-			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();   
-			ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
-			
-			ImageIO.write(out, "png", ios);
-	        byte[] buffer = baos.toByteArray();
-	        
 
-	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(buffer));
-	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
-	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, "image/png");
-	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.length);
-
-
-			ctx.writeAndFlush(httpResponse);
-			ios.close();
 		}
 				
 		@Override
 		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-			ctx.flush();
+			long start = Calendar.getInstance().getTimeInMillis();
+			//ImageIO.write(out, "jpeg", ios);
+			
+	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer);
+	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
+	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, "image/png");
+	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer);
+	        
+			ctx.writeAndFlush(httpResponse);
 			ctx.close();
+			
+			System.out.println(Calendar.getInstance().getTimeInMillis() - start);
 		}
 		
 		@Override

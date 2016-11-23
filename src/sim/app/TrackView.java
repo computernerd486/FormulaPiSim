@@ -63,7 +63,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String VERSION = "RELEASE - 1.0.1";
+	private static final String VERSION = "RELEASE - 1.0.2";
 	
 	//OpenGL objects
 	Animator anim;
