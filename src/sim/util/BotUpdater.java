@@ -19,9 +19,9 @@ public class BotUpdater{
 	private LapTimer laptimer;
 	
 	
-	public BotUpdater(Bot bot, LapTimer laptimer){
+	public BotUpdater(Bot bot){
 		this.bot = bot;
-		this.laptimer = laptimer;
+		this.laptimer = bot.laptimer;
 	}
 
 	public void start()

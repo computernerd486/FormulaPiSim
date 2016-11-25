@@ -61,6 +61,7 @@ public class LapTimer {
 			
 			currentLap = new Lap();
 			currentLap.start();
+			bot.tracker.newLap();
 
 		}
 		

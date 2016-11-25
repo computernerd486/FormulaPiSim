@@ -93,7 +93,6 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public Bot bot;
 	BotUpdater botUpdater;
 	Track track;
-	LapTimer laptimer;
 	
 	//This is for output
 	public BufferedImage botView;
@@ -149,7 +148,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		//TrackNode start = track.nodes[0];
 		Point2D start = track.startPositions[Math.round(track.lanes / 2)];
 		bot = new Bot(new Point2D(start.x + 8, start.y), 180f); //TODO: Set bot offset from half width.
-		laptimer = new LapTimer(track, bot);
+		bot.laptimer = new LapTimer(track, bot);
 		
 		
 		bs.accel.setValue(bot.m1.accel_rate);
@@ -164,7 +163,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 		ss.lane.setSelectedIndex(Math.round(track.lanes / 2));
 		
-		botUpdater = new BotUpdater(bot, laptimer);
+		botUpdater = new BotUpdater(bot);
 		botUpdater.start();
 		
 		tr = new TextRenderer(new Font("SansSerif", Font.PLAIN, 16));
@@ -294,6 +293,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glOrtho(0, track.bounds.x, 0, track.bounds.y, -50, 50);
 			
 			drawTrack(glautodrawable);
+			drawLap(glautodrawable, bot);
 			drawBot(glautodrawable);
 		}
 		
@@ -356,14 +356,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			int currentOffset = 0;
 			tr.draw("Laps:", 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
 			
-			for (int l = 0; l < laptimer.laps.size(); l++) { 
-				tr.draw(laptimer.laps.get(l).toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			for (int l = 0; l < bot.laptimer.laps.size(); l++) { 
+				tr.draw(bot.laptimer.laps.get(l).toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
 			}
 			
 			tr.draw("---------", 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
 			
-			if (laptimer.currentLap != null) {
-				tr.draw(laptimer.currentLap.toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
+			if (bot.laptimer.currentLap != null) {
+				tr.draw(bot.laptimer.currentLap.toString(), 8,  view_height_firstperson - (currentOffset += TEXTOFFSET));
 			}
 			tr.endRendering();
 		}
@@ -512,6 +512,35 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		if (tex_bot != null)
 			tex_bot.disable(gl2);
+	}
+	
+	private void drawLap(GLAutoDrawable glautodrawable, Bot bot)
+	{
+		GL2 gl2 = glautodrawable.getGL().getGL2();
+
+		gl2.glLineWidth(2f);
+		
+		gl2.glColor3f(.36f, .7f, .9f);
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		{
+			for (Point2D p : bot.tracker.lastLap)
+				gl2.glVertex3d(p.x, p.y, 1);
+		}
+		gl2.glEnd();
+		
+		gl2.glColor3f(.9f, .62f, .32f);
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		{
+			for (Point2D p : bot.tracker.currentLap)
+				gl2.glVertex3d(p.x, p.y, 1);
+		}
+		gl2.glEnd();
+	}
+	
+	private void drawBot3D(GLAutoDrawable glautodrawable, Bot bot)
+	{
+		GL2 gl2 = glautodrawable.getGL().getGL2();
+		
 	}
 	
 	private void drawFirstPerson(GLAutoDrawable glautodrawable)

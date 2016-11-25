@@ -56,6 +56,9 @@ public class Bot {
 	public Motor m1, m2;
 	public boolean light;
 	
+	public LapTracker tracker;
+	public LapTimer laptimer;
+	
 	public Bot()
 	{
 		this(new Point2D(0,0));
@@ -63,7 +66,6 @@ public class Bot {
 	
 	public Bot(Point2D start)
 	{
-		
 		this(start, 0f);
 	}
 	
@@ -79,6 +81,7 @@ public class Bot {
 		
 		m1 = new Motor();
 		m2 = new Motor();
+		tracker = new LapTracker();
 		
 		setDirection(angle);
 		
@@ -175,6 +178,7 @@ public class Bot {
 		
 		setDirection((float) Math.toDegrees(angle));		
 		
+		tracker.currentLap.add(new Point2D(position.x, position.y));
 	}
 	
 	public void loadConfig(String file){

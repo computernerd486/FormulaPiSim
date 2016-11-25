@@ -12,14 +12,12 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
@@ -289,8 +287,7 @@ public class RTSPStreamer extends VideoStreamer {
 				
 		@Override
 		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-			long start = Calendar.getInstance().getTimeInMillis();
-			//ImageIO.write(out, "jpeg", ios);
+			//long start = Calendar.getInstance().getTimeInMillis();
 			
 	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer);
 	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
@@ -300,7 +297,7 @@ public class RTSPStreamer extends VideoStreamer {
 			ctx.writeAndFlush(httpResponse);
 			ctx.close();
 			
-			System.out.println(Calendar.getInstance().getTimeInMillis() - start);
+			//System.out.println(Calendar.getInstance().getTimeInMillis() - start);
 		}
 		
 		@Override
