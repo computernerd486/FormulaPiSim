@@ -91,6 +91,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 
 	//Bot
 	public Bot bot;
+	BotModel botModel;
 	BotUpdater botUpdater;
 	Track track;
 	
@@ -150,6 +151,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		bot = new Bot(new Point2D(start.x + 8, start.y), 180f); //TODO: Set bot offset from half width.
 		bot.laptimer = new LapTimer(track, bot);
 		
+		botModel = new BotModel();
 		
 		bs.accel.setValue(bot.m1.accel_rate);
 		bs.deccel.setValue(bot.m1.decel_rate);
@@ -295,6 +297,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			drawTrack(glautodrawable);
 			drawLap(glautodrawable, bot);
 			drawBot(glautodrawable);
+			drawBot3D(glautodrawable, bot);
 		}
 		
 		//Draw the First Person/Robot View
@@ -507,7 +510,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glVertex2d( (bot_width / 2), -(bot_height/2));
 		}
 		gl2.glEnd();
-		gl2.glTranslatef(-(float)bot.position.x, -(float)bot.position.y, 0f);
+		//gl2.glTranslatef(-(float)bot.position.x, -(float)bot.position.y, 0f);
 		gl2.glPopMatrix();
 		
 		if (tex_bot != null)
@@ -539,14 +542,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private void drawBot3D(GLAutoDrawable glautodrawable, Bot bot)
 	{
-		GL2 gl2 = glautodrawable.getGL().getGL2();
-		
+		//botModel.draw(glautodrawable, bot, null);
 	}
 	
 	private void drawFirstPerson(GLAutoDrawable glautodrawable)
 	{
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		drawTrack(glautodrawable);
+		drawBot3D(glautodrawable, bot);
 		
 		ByteBuffer botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
 		gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, botViewBuffer);
@@ -901,9 +904,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public void init(GLAutoDrawable glautodrawable ) {
 		loadTextures(glautodrawable);
 		track.lights.loadTextures(glautodrawable);
+		botModel.loadTextures(glautodrawable);
 		
 		prepTrackBuffers();
 		track.lights.prepIndicatorBuffer(glautodrawable);
+		botModel.setupBuffer();
 		
 		setupLighting(glautodrawable);
 	}
@@ -911,6 +916,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	@Override
 	public void dispose(GLAutoDrawable glautodrawable ) {
 		track.lights.cleanup(glautodrawable);
+		botModel.cleanup(glautodrawable);
 	}
 	
 	@Override
