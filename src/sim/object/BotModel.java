@@ -49,6 +49,8 @@ public class BotModel {
 	FloatBuffer vertices_rim;
 	FloatBuffer texCoords_rim;
 	
+	FloatBuffer vertices_base;
+	
 	Texture tex_tyre;
 	Texture tex_lid;
 	Texture tex_rim;
@@ -148,11 +150,46 @@ public class BotModel {
 		vertices_rim = vRim;
 		texCoords_rim = cRim;
 		
+		FloatBuffer vBase = GLBuffers.newDirectFloatBuffer(20 * 3 * GLBuffers.SIZEOF_FLOAT);
+		
+		float half_bl = base_length / 2;
+		float half_bw = base_width / 2;
+		float tyre_sl = half_bw + tyre_width;
+		float tyre_sw = 2f;
+		float tyre_sh = 3f;
+				
+		vBase.put(half_bl).put(tyre_sl).put(0);
+		vBase.put(half_bl).put(-tyre_sl).put(0);
+		vBase.put(half_bl).put(tyre_sl).put(-tyre_sh);
+		vBase.put(half_bl).put(-tyre_sl).put(-tyre_sh);
+		vBase.put(half_bl - tyre_sw).put(tyre_sl).put(-tyre_sh);
+		vBase.put(half_bl - tyre_sw).put(-tyre_sl).put(-tyre_sh);
+		vBase.put(half_bl - tyre_sw).put(tyre_sl).put(0);
+		vBase.put(half_bl - tyre_sw).put(-tyre_sl).put(0);
+		vBase.put(half_bl).put(tyre_sl).put(0);
+		vBase.put(half_bl).put(-tyre_sl).put(0);
+		
+		vBase.put(-half_bl).put(tyre_sl).put(0);
+		vBase.put(-half_bl).put(-tyre_sl).put(0);
+		vBase.put(-half_bl).put(tyre_sl).put(-tyre_sh);
+		vBase.put(-half_bl).put(-tyre_sl).put(-tyre_sh);
+		vBase.put(-half_bl + tyre_sw).put(tyre_sl).put(-tyre_sh);
+		vBase.put(-half_bl + tyre_sw).put(-tyre_sl).put(-tyre_sh);
+		vBase.put(-half_bl + tyre_sw).put(tyre_sl).put(0);
+		vBase.put(-half_bl + tyre_sw).put(-tyre_sl).put(0);
+		vBase.put(-half_bl).put(tyre_sl).put(0);
+		vBase.put(-half_bl).put(-tyre_sl).put(0);
+
+		
+		vBase.flip();
+		vertices_base = vBase;
+		
+		
 	}
 	
 	public void cleanup(GLAutoDrawable glautodrawable) {}
 	
-	float r = 0;
+	//float r = 0;
 	
 	/**
 	 * 
@@ -163,14 +200,15 @@ public class BotModel {
 	public void draw(GLAutoDrawable glautodrawable, Bot bot, Texture lidOverride) {
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glDisable(GL.GL_CULL_FACE);
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
 		gl2.glColor3f(1f, 0f, 1f);
 		
 		gl2.glPushMatrix();
 		gl2.glTranslatef((float)bot.position.x - 40, (float)bot.position.y, 0);
-		//gl2.glRotatef(bot.direction, 0f, 0f, 1f);
-		r += .25f;
-		gl2.glRotatef(r, 0f, 0f, 1f);
+		gl2.glRotatef(bot.direction, 0f, 0f, 1f);
+		//r += .25f;
+		//gl2.glRotatef(r, 0f, 0f, 1f);
 
 		//baseplate
 		gl2.glPushMatrix();
@@ -179,21 +217,28 @@ public class BotModel {
 		gl2.glBegin(GL2.GL_QUADS);
 		{
 			gl2.glTexCoord2d(1,0);
-			gl2.glVertex2d(-(base_length / 2), -(base_width/2));
+			gl2.glVertex3d(-(base_length / 2), -(base_width/2), .25d);
 			gl2.glTexCoord2d(0,0);
-			gl2.glVertex2d(-(base_length / 2),  (base_width/2));
+			gl2.glVertex3d(-(base_length / 2),  (base_width/2), .25d);
 			gl2.glTexCoord2d(0,1);
-			gl2.glVertex2d( (base_length / 2),  (base_width/2));
+			gl2.glVertex3d( (base_length / 2),  (base_width/2), .25d);
 			gl2.glTexCoord2d(1,1);
-			gl2.glVertex2d( (base_length / 2), -(base_width/2));
+			gl2.glVertex3d( (base_length / 2), -(base_width/2), .25d);
 		}
 		gl2.glEnd();
-		unsetText(gl2, (lidOverride == null) ? tex_lid : lidOverride);
+		unsetTex(gl2, (lidOverride == null) ? tex_lid : lidOverride);
+		
+		gl2.glColor3f(.8f, .8f, .85f);
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_base);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, 10);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 10, 10);
+		
 		gl2.glPopMatrix();
 		
 		//Tyres
 		gl2.glColor3f(0f, 1f, 1f);
-		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		
+		
 		for (float[] pos : tyre_offset )
 		{
 			gl2.glPushMatrix();
@@ -204,21 +249,20 @@ public class BotModel {
 			setTex(gl2, tex_tyre, texCoords_tread);
 			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_tread);
 			gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, treadVCount);
-			unsetText(gl2, tex_tyre);
+			unsetTex(gl2, tex_tyre);
 			
 			//gl2.glEnable(GL.GL_CULL_FACE);
 			setTex(gl2, tex_rim, texCoords_rim);
 			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_rim);
 			gl2.glDrawArrays(GL2.GL_QUADS, 0, 8);
-			unsetText(gl2, tex_rim);
+			unsetTex(gl2, tex_rim);
 			
 			gl2.glPopMatrix();
 		}
-		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-		
+
 		//bot matrix
 		gl2.glPopMatrix();
-		
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 	}
 	
 	private void setTex(GL2 gl2, Texture tex, FloatBuffer texCoords) {
@@ -231,7 +275,7 @@ public class BotModel {
 		} 
 	}
 	
-	private void unsetText(GL2 gl2, Texture tex) {
+	private void unsetTex(GL2 gl2, Texture tex) {
 		if (tex != null) {
 			tex.disable(gl2);
 			gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
