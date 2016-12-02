@@ -10,8 +10,10 @@ import java.awt.GridLayout;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
@@ -36,6 +38,8 @@ public class VideoSettings extends JPanel {
 	public JButton server_start;
 	
 	public JLabel runningStatus; 
+	public JCheckBox flipVideo;
+	public JSlider lightness;
 	
 	
 	public VideoSettings() {	
@@ -105,9 +109,21 @@ public class VideoSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.NORTH, runningStatus, 6, SpringLayout.SOUTH, port);
 		springLayout.putConstraint(SpringLayout.EAST, runningStatus, 0, SpringLayout.EAST, resY);
 		settings.add(runningStatus);
+		
+		flipVideo = new JCheckBox("Flip Bot");
+		springLayout.putConstraint(SpringLayout.NORTH, flipVideo, 6, SpringLayout.SOUTH, lblStatus);
+		springLayout.putConstraint(SpringLayout.WEST, flipVideo, 10, SpringLayout.WEST, settings);
+		springLayout.putConstraint(SpringLayout.EAST, flipVideo, -10, SpringLayout.EAST, settings);
+		settings.add(flipVideo);
+		
+		lightness = new JSlider(-5, 5, 0);
+		springLayout.putConstraint(SpringLayout.NORTH, lightness, 6, SpringLayout.SOUTH, flipVideo);
+		springLayout.putConstraint(SpringLayout.WEST, lightness, 10, SpringLayout.WEST, settings);
+		springLayout.putConstraint(SpringLayout.EAST, lightness, -10, SpringLayout.EAST, settings);
+		settings.add(lightness);
 				
 		JPanel panel = new JPanel();
-		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.SOUTH, lblStatus);
+		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.SOUTH, lightness);
 		springLayout.putConstraint(SpringLayout.WEST, panel, 10, SpringLayout.WEST, settings);
 		springLayout.putConstraint(SpringLayout.EAST, panel, -10, SpringLayout.EAST, settings);
 		settings.add(panel);
@@ -118,6 +134,8 @@ public class VideoSettings extends JPanel {
 		
 		server_stop = new JButton("Stop");
 		panel.add(server_stop);
+		
+
 		
 		this.add(settings);
 		

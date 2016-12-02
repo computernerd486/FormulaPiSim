@@ -93,7 +93,13 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	public Bot bot;
 	BotModel botModel;
 	BotUpdater botUpdater;
+	int userLane;
+	
 	Track track;
+	boolean isFlipped = false;
+	
+	public Bot aiBots[];
+	BotUpdater aiUpdaters[];
 	
 	//This is for output
 	public BufferedImage botView;
@@ -147,11 +153,21 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		track.load(track_default);
 		
 		//TrackNode start = track.nodes[0];
-		Point2D start = track.startPositions[Math.round(track.lanes / 2)];
+		userLane = Math.round(track.lanes / 2);
+		Point2D start = track.startPositions[userLane];
 		bot = new Bot(new Point2D(start.x + 8, start.y), 180f); //TODO: Set bot offset from half width.
 		bot.laptimer = new LapTimer(track, bot);
 		
 		botModel = new BotModel();
+		
+		//Startup one per lane, we'll just skip whichever one is on your starting lane for drawing.
+		aiBots = new Bot[track.lanes];
+		aiUpdaters = new AIBotUpdater[track.lanes];
+		for (int i = 0; i < track.lanes; i++) {
+			Point2D sp = track.startPositions[i];
+			aiBots[i] = new Bot(new Point2D(sp.x + 8, sp.y), 180f);
+			aiUpdaters[i] = new AIBotUpdater(aiBots[i], track, i);
+		}
 		
 		bs.accel.setValue(bot.m1.accel_rate);
 		bs.deccel.setValue(bot.m1.decel_rate);
@@ -315,10 +331,18 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			gl2.glLoadIdentity();
 			
 			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.01f, 2000.0 );
+			
 			glu.gluLookAt(
 					bot.position.x, bot.position.y, bot.height, 
 					bot.focus.x, bot.focus.y, bot.focus.z, 
+					0d, 0d, (isFlipped) ? -1d : 1d);
+			
+			/*
+			glu.gluLookAt(
+					bot.position.x, bot.position.y, bot.height + 40, 
+					bot.position.x - 40, bot.position.y, bot.height, 
 					0d, 0d, 1d);
+			*/
 			
 			drawFirstPerson(glautodrawable);
 			
@@ -459,7 +483,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		}
 
 		//Set Color to black, and draw walls
-		gl2.glColor3f(.1f, .1f, .1f);
+		gl2.glColor3f(.15f, .15f, .15f);
 		
 		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_innerwall);
 		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, drawCount);
@@ -543,6 +567,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	private void drawBot3D(GLAutoDrawable glautodrawable, Bot bot)
 	{
 		//botModel.draw(glautodrawable, bot, null);
+		
+		for (int i = 0; i < aiBots.length; i++) {
+			if (((AIBotUpdater)aiUpdaters[i]).lane != userLane)
+				botModel.draw(glautodrawable, aiBots[i], null);
+		}
 	}
 	
 	private void drawFirstPerson(GLAutoDrawable glautodrawable)
@@ -725,6 +754,14 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
+		vs.flipVideo.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				isFlipped = vs.flipVideo.isSelected();
+			}
+		});
+		
 		//Next with the bot controls
 		
 		bs.bot_start.setEnabled(false);
@@ -750,7 +787,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		bs.bot_reset.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Point2D start = track.startPositions[ss.lane.getSelectedIndex()];
+				userLane = ss.lane.getSelectedIndex();
+				Point2D start = track.startPositions[userLane];
 				bot.p_m1 = 0f;
 				bot.p_m2 = 0f;
 				bot.light = false;
@@ -848,6 +886,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				track.lights.status = IndicatorBar.Status.RED;
 			}
 		});
+		
+		ss.startAI.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for (BotUpdater updr : aiUpdaters)
+					updr.start();
+			}
+		});
 
 	}
 	
@@ -936,3 +983,17 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 	}
 }
+
+/**
+ * Notes:
+ * 
+ * Desaturate:
+ * f = 0.2; // desaturate by 20%
+ * L = 0.3*r + 0.6*g + 0.1*b;
+ * new_r = r + f * (L - r);
+ * new_g = g + f * (L - g);
+ * new_b = b + f * (L - b);
+ * 
+ * Lumanace:
+ * Y = (R+R+R+B+G+G+G+G)>>3
+ */

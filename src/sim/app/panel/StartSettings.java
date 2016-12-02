@@ -17,6 +17,7 @@ public class StartSettings extends JPanel {
 	public JButton lightsRed;
 	public JButton lightsGreen;
 	public JComboBox lane;
+	public JButton startAI;
 	
 	public StartSettings() {
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -61,6 +62,13 @@ public class StartSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.NORTH, lane, 6, SpringLayout.SOUTH, lightsRed);
 		springLayout.putConstraint(SpringLayout.EAST, lane, 0, SpringLayout.EAST, lightsOff);
 		settings.add(lane);
+		
+		startAI = new JButton("Start AI");
+		springLayout.putConstraint(SpringLayout.NORTH, startAI, 6, SpringLayout.SOUTH, lblLane);
+		springLayout.putConstraint(SpringLayout.WEST, startAI, 0, SpringLayout.WEST, lightsGreen);
+		springLayout.putConstraint(SpringLayout.EAST, startAI, 0, SpringLayout.EAST, lightsGreen);
+		settings.add(startAI);
+		
 		
 		this.add(settings);
 	}

@@ -27,7 +27,7 @@ public class Track {
 	public Float lightX;
 	public Float startX;
 	public int lanes;
-
+	
 	//Private for internal processesing
 	String filename;
 	Float radius;
@@ -98,9 +98,11 @@ public class Track {
 			System.err.println(e);
 		} 
 		
+		float lane_width = (radius * 2f) / (lanes + 1f);
 		
 		//Do math generation
 		nodes = new TrackNode[points.size()];
+		
 		for (int i = 0; i < points.size(); i++) {
 			Point2D p0 = points.get((i == 0) ? points.size() - 1 : i - 1);
 			Point2D p1 = points.get(i);
@@ -108,10 +110,21 @@ public class Track {
 
 			double t_ab = getSplitTheta(p0, p1, p2);
 			nodes[i] = new TrackNode(offsetPoint(p1, radius, t_ab), p1, offsetPoint(p1, -radius, t_ab));
+			
+			int center = lanes / 2;
+			Point2D[] lane = new Point2D[lanes];
+			for (int l = 0; l < lanes; l++) {
+				if (l == center) {
+					lane[l] = p1;
+					continue;
+				}
+				
+				lane[l] = offsetPoint(p1, (lane_width * -(center - l)), t_ab);
+			}
+			nodes[i].lane = lane;
 		}
 		
 		lights = new IndicatorBar(new Point2D(lightX, nodes[0].p.y), radius);
-		float lane_width = (radius * 2f) / (lanes + 1f);
 		startPositions = new Point2D[lanes];
 		
 		for (int l = 1; l <= lanes; l++) {

@@ -205,7 +205,7 @@ public class BotModel {
 		gl2.glColor3f(1f, 0f, 1f);
 		
 		gl2.glPushMatrix();
-		gl2.glTranslatef((float)bot.position.x - 40, (float)bot.position.y, 0);
+		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0);
 		gl2.glRotatef(bot.direction, 0f, 0f, 1f);
 		//r += .25f;
 		//gl2.glRotatef(r, 0f, 0f, 1f);

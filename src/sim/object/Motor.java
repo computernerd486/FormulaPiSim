@@ -3,8 +3,8 @@ package sim.object;
 public class Motor {
 	
 	//acceleration rate, percent/20ms
-	public float accel_rate = 0.01f;
-	public float decel_rate = -0.002f;
+	public float accel_rate = 0.05f;
+	public float decel_rate = -0.01f;
 
 	public float spd_sig;
 	public float spd_act;

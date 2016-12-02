@@ -14,9 +14,9 @@ import sim.object.LapTimer;
 
 public class BotUpdater{
 
-	private Bot bot;
-	private Timer timer;
-	private LapTimer laptimer;
+	protected Bot bot;
+	protected Timer timer;
+	protected LapTimer laptimer;
 	
 	
 	public BotUpdater(Bot bot){
