@@ -124,6 +124,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	//For Drawing opengl text
 	TextRenderer tr;
+	ByteBuffer botViewBuffer;
 	
 	public TrackView() {
 		
@@ -576,11 +577,11 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private void drawFirstPerson(GLAutoDrawable glautodrawable)
 	{
-		GL2 gl2 = glautodrawable.getGL().getGL2();
+		GL2 gl2 = glautodrawable.getGL().getGL2();	
 		drawTrack(glautodrawable);
 		drawBot3D(glautodrawable, bot);
 		
-		ByteBuffer botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
+		botViewBuffer.clear();
 		gl2.glReadPixels(0, height - view_height_firstperson, view_width_firstperson, view_height_firstperson, GL2.GL_RGB, GL2.GL_BYTE, botViewBuffer);
 		
 		for (int y = 0; y < view_height_firstperson; y++) {
@@ -956,6 +957,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		prepTrackBuffers();
 		track.lights.prepIndicatorBuffer(glautodrawable);
 		botModel.setupBuffer();
+		
+		botViewBuffer = GLBuffers.newDirectByteBuffer(view_width_firstperson * view_height_firstperson * 3);
 		
 		setupLighting(glautodrawable);
 	}

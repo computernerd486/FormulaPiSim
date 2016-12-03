@@ -42,6 +42,8 @@ public class BotModel {
 	public float base_width = 8.4f;
 	public float base_length = 12.5f;
 
+	int rimSteps = 20;
+
 	FloatBuffer vertices_tread;
 	FloatBuffer texCoords_tread;
 	int treadVCount;
@@ -80,7 +82,7 @@ public class BotModel {
 		
 		ArrayList<Point2D> edge = new ArrayList<>();
 		//wheel
-		int step = 360 / 12;
+		int step = 360 / rimSteps;
 		for (int a = 0; a < 360; a += step) {	
 			edge.add(new Point2D(
 					Math.cos(Math.toRadians(a)) * tyre_radius, 
@@ -94,8 +96,8 @@ public class BotModel {
 		}
 		
 		//Segements * sides * coord * float size
-		FloatBuffer vTread = GLBuffers.newDirectFloatBuffer((treadVCount + 1) * 3 * GLBuffers.SIZEOF_FLOAT);
-		FloatBuffer cTread = GLBuffers.newDirectFloatBuffer((treadVCount + 1) * 2 * GLBuffers.SIZEOF_FLOAT);
+		FloatBuffer vTread = GLBuffers.newDirectFloatBuffer((treadVCount + 1) * 3 * GLBuffers.SIZEOF_FLOAT * 2);
+		FloatBuffer cTread = GLBuffers.newDirectFloatBuffer((treadVCount + 1) * 2 * GLBuffers.SIZEOF_FLOAT * 2);
 		
 		for (int i = 0; i < edge.size(); i++) {
 			Point2D p1 = edge.get(i);
@@ -119,12 +121,59 @@ public class BotModel {
 		
 		vertices_tread = vTread;
 		texCoords_tread = cTread;
+
+		double anglePerStep = 2.0 * Math.PI / rimSteps;
+		float x;
+		float y;
 		
+		FloatBuffer vRim = GLBuffers.newDirectFloatBuffer(rimSteps * 4 * 2 * 3 * GLBuffers.SIZEOF_FLOAT);
+		FloatBuffer cRim = GLBuffers.newDirectFloatBuffer(rimSteps * 4 * 2 * 2 * GLBuffers.SIZEOF_FLOAT);
 		
-		FloatBuffer vRim = GLBuffers.newDirectFloatBuffer(8 * 3 * GLBuffers.SIZEOF_FLOAT);
-		FloatBuffer cRim = GLBuffers.newDirectFloatBuffer(8 * 2 * GLBuffers.SIZEOF_FLOAT);
-		
-		vRim.put( tyre_radius).put(0f).put(-tyre_radius);
+		// Outside rim
+		for (int i = 0; i < rimSteps; ++i) {
+			x = -tyre_radius * (float)(Math.sin(i * anglePerStep));
+			y = tyre_radius * (float)(Math.cos(i * anglePerStep));
+			vRim.put(0).put(tyre_width).put(0); 
+			vRim.put(x).put(tyre_width).put(y);
+			
+			x = -tyre_radius * (float)(Math.sin((i+1) * anglePerStep));
+			y = tyre_radius * (float)(Math.cos((i+1) * anglePerStep)); 
+			vRim.put(x).put(tyre_width).put(y);
+			vRim.put(0).put(tyre_width).put(0); 
+			
+			x = -0.25f * (float)(Math.sin(i * anglePerStep)) + 0.25f;
+			y = 0.5f * (float)(Math.cos(i * anglePerStep)) + 0.5f; 
+			cRim.put(0.25f).put(0.5f);
+			cRim.put(x).put(y);
+			x = -0.25f * (float)(Math.sin((i+1) * anglePerStep)) + 0.25f;
+			y = 0.5f * (float)(Math.cos((i+1) * anglePerStep)) + 0.5f; 
+			cRim.put(x).put(y);
+			cRim.put(0.25f).put(0.5f);
+		}
+
+		// Inside rim
+		for (int i = 0; i < rimSteps; ++i) {
+			x = -tyre_radius * (float)(Math.sin(i * anglePerStep));
+			y = tyre_radius * (float)(Math.cos(i * anglePerStep));
+			vRim.put(0).put(0).put(0); 
+			vRim.put(x).put(0).put(y);
+			
+			x = -tyre_radius * (float)(Math.sin((i+1) * anglePerStep));
+			y = tyre_radius * (float)(Math.cos((i+1) * anglePerStep)); 
+			vRim.put(x).put(0).put(y);
+			vRim.put(0).put(0).put(0); 
+			
+			x = -0.25f * (float)(Math.sin(i * anglePerStep)) + 0.75f;
+			y = 0.5f * (float)(Math.cos(i * anglePerStep)) + 0.5f; 
+			cRim.put(0.75f).put(0.5f);
+			cRim.put(x).put(y);
+			x = -0.25f * (float)(Math.sin((i+1) * anglePerStep)) + 0.75f;
+			y = 0.5f * (float)(Math.cos((i+1) * anglePerStep)) + 0.5f; 
+			cRim.put(x).put(y);
+			cRim.put(0.75f).put(0.5f);
+		}
+
+		/*vRim.put( tyre_radius).put(0f).put(-tyre_radius);
 		vRim.put(-tyre_radius).put(0f).put(-tyre_radius);
 		vRim.put(-tyre_radius).put(0f).put( tyre_radius);
 		vRim.put( tyre_radius).put(0f).put( tyre_radius);
@@ -142,7 +191,7 @@ public class BotModel {
 		cRim.put(0).put(0);
 		cRim.put(.5f).put(0);
 		cRim.put(.5f).put(1);
-		cRim.put(0).put(1);
+		cRim.put(0).put(1);*/
 
 		vRim.flip();
 		cRim.flip();
@@ -199,18 +248,55 @@ public class BotModel {
 	 */
 	public void draw(GLAutoDrawable glautodrawable, Bot bot, Texture lidOverride) {
 		GL2 gl2 = glautodrawable.getGL().getGL2();
+		gl2.glEnable(GL.GL_DEPTH_TEST);
+		gl2.glDepthFunc(GL.GL_LEQUAL);
+		gl2.glEnable(GL2.GL_BLEND);
+		gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl2.glDisable(GL.GL_CULL_FACE);
 		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-
-		gl2.glColor3f(1f, 0f, 1f);
 		
 		gl2.glPushMatrix();
-		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0);
+		gl2.glTranslatef((float)bot.position.x/* - 40*/, (float)bot.position.y, 0);
 		gl2.glRotatef(bot.direction, 0f, 0f, 1f);
 		//r += .25f;
 		//gl2.glRotatef(r, 0f, 0f, 1f);
+		
+		// Chassis
+		gl2.glEnable(GL.GL_DEPTH_TEST);
+		gl2.glDepthFunc(GL.GL_ALWAYS);
+		gl2.glPushMatrix();
+		gl2.glTranslatef(0,0,6f);
+		gl2.glColor3f(.8f, .8f, .85f);
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_base);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, 10);
+		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 10, 10);
+		gl2.glPopMatrix();
 
-		//baseplate
+		//Tyres
+		gl2.glColor3f(0f, 1f, 1f);
+		
+
+		gl2.glEnable(GL.GL_DEPTH_TEST);
+		gl2.glDepthFunc(GL.GL_LEQUAL);
+		for (float[] pos : tyre_offset )
+		{
+			gl2.glPushMatrix();
+			gl2.glTranslatef(pos[0], pos[1], tyre_radius);
+			gl2.glRotatef(pos[2], 0f, 0f, 1f);
+			
+			//gl2.glDisable(GL.GL_CULL_FACE);
+			setTex(gl2, tex_tyre, texCoords_tread);
+			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_tread);
+			gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, treadVCount);
+			unsetTex(gl2, tex_tyre);
+			
+			gl2.glPopMatrix();
+		}
+
+		//baseplate		
+		gl2.glEnable(GL.GL_DEPTH_TEST);
+		gl2.glDepthFunc(GL.GL_LEQUAL);
+		gl2.glColor3f(1f, 0f, 1f);
 		gl2.glPushMatrix();
 		setTex(gl2, (lidOverride == null) ? tex_lid : lidOverride, null);
 		gl2.glTranslatef(0,0,6f);
@@ -228,33 +314,24 @@ public class BotModel {
 		gl2.glEnd();
 		unsetTex(gl2, (lidOverride == null) ? tex_lid : lidOverride);
 		
-		gl2.glColor3f(.8f, .8f, .85f);
-		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_base);
-		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, 10);
-		gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 10, 10);
-		
 		gl2.glPopMatrix();
 		
-		//Tyres
+
+		//Rims
 		gl2.glColor3f(0f, 1f, 1f);
 		
-		
+		gl2.glEnable(GL.GL_DEPTH_TEST);
+		gl2.glDepthFunc(GL.GL_LEQUAL);
 		for (float[] pos : tyre_offset )
 		{
 			gl2.glPushMatrix();
 			gl2.glTranslatef(pos[0], pos[1], tyre_radius);
 			gl2.glRotatef(pos[2], 0f, 0f, 1f);
-			
-			//gl2.glDisable(GL.GL_CULL_FACE);
-			setTex(gl2, tex_tyre, texCoords_tread);
-			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_tread);
-			gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, treadVCount);
-			unsetTex(gl2, tex_tyre);
-			
+					
 			//gl2.glEnable(GL.GL_CULL_FACE);
 			setTex(gl2, tex_rim, texCoords_rim);
 			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_rim);
-			gl2.glDrawArrays(GL2.GL_QUADS, 0, 8);
+			gl2.glDrawArrays(GL2.GL_QUADS, 0, 8 * rimSteps);
 			unsetTex(gl2, tex_rim);
 			
 			gl2.glPopMatrix();
