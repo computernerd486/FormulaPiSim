@@ -309,7 +309,7 @@ public class RTSPStreamer extends VideoStreamer {
 	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer);
 	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
 	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, "image/png");
-	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer);
+	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.length);
 	        
 			ctx.writeAndFlush(httpResponse);
 			ctx.close();
