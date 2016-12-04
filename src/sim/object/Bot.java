@@ -26,6 +26,8 @@ public class Bot {
 	public Point2D dimensions;
 	public Point2D position;
 	public Point3D focus;
+	public Point3D camera;
+	
 	public float height;
 	
 	public float direction;
@@ -52,6 +54,7 @@ public class Bot {
 	
 	public float bot_bound_width = 18f;
 	public float bot_bound_length = 19f;
+	public float camera_forward = 7f;
 	
 	public Motor m1, m2;
 	public boolean light;
@@ -141,10 +144,18 @@ public class Bot {
 	public void setDirection(float angle)
 	{
 		this.direction = angle; //(float) Math.toRadians(angle);
+		double cos = Math.cos(Math.toRadians(angle));
+		double sin = Math.sin(Math.toRadians(angle));
+		
 		this.focus = new Point3D(
-				(Math.cos(Math.toRadians(angle)) * 10d) + position.x,
-				(Math.sin(Math.toRadians(angle)) * 10d) + position.y,
-				(double)(height - 0.2f)); //2% down angle
+				(cos * (10d + camera_forward)) + position.x,
+				(sin * (10d + camera_forward)) + position.y,
+				(double)(height - 0.6f)); //2% down angle
+				
+		this.camera = new Point3D(
+				(cos * camera_forward) + position.x,
+				(sin * camera_forward) + position.y,
+				(double)(height)); //2% down angle	
 		
 		//System.out.println("Positon " + position);
 		//System.out.println("Angle   " + direction);

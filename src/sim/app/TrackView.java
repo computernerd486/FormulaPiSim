@@ -331,10 +331,10 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			gl2.glLoadIdentity();
 			
-			glu.gluPerspective( 45.0, view_width_firstperson/view_height_firstperson, 0.01f, 2000.0 );
+			glu.gluPerspective( 55, (float)view_width_firstperson/(float)view_height_firstperson, 1f, 2000.0f );
 			
 			glu.gluLookAt(
-					bot.position.x, bot.position.y, bot.height, 
+					bot.camera.x, bot.camera.y, bot.camera.z, 
 					bot.focus.x, bot.focus.y, bot.focus.z, 
 					0d, 0d, (isFlipped) ? -1d : 1d);
 			

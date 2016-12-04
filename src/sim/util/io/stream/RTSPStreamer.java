@@ -17,8 +17,11 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -69,6 +72,7 @@ public class RTSPStreamer extends VideoStreamer {
 	ByteArrayOutputStream baos;
 	ImageOutputStream ios;
 	ImageWriter imageWriter;
+	ImageWriteParam writerParams;
 	
 	byte[] buffer;
 	ByteBuf httpBuffer;
@@ -126,7 +130,20 @@ public class RTSPStreamer extends VideoStreamer {
 		baos = new ByteArrayOutputStream();   
 		ios = ImageIO.createImageOutputStream(baos);
 		
-		imageWriter = ImageIO.getImageWritersByFormatName("PNG").next();
+		if (false) { //PNG
+			imageWriter = ImageIO.getImageWritersByFormatName("PNG").next();
+			writerParams = imageWriter.getDefaultWriteParam();;
+		} else { //JPG
+			
+			imageWriter = ImageIO.getImageWritersByFormatName("JPG").next();
+			JPEGImageWriteParam jpegParams = (JPEGImageWriteParam) imageWriter.getDefaultWriteParam();
+			jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+			jpegParams.setCompressionQuality(.4f);
+			
+			writerParams = jpegParams;
+		}
+		
+		
 		imageWriter.setOutput(ios);			
 		
 		if (!isRunning) {
@@ -216,7 +233,7 @@ public class RTSPStreamer extends VideoStreamer {
 		public void run() {
 			try {
 				baos.reset();
-				imageWriter.write(out);
+				imageWriter.write(null, new IIOImage(out, null, null), writerParams);
 				buffer = baos.toByteArray();
 				httpBuffer = Unpooled.wrappedBuffer(buffer);
 				
