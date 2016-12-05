@@ -56,6 +56,14 @@ import sim.object.Bot;
  *
  */
 public class RTSPStreamer extends VideoStreamer {
+	
+	public enum Format { 
+		PNG ("image/png"), 
+		JPG ("image/jpg");
+		
+		public String contentType;
+		Format(String contentType) {this.contentType = contentType;}
+	}
 
 	public static String PROPERTIES_FILE = "settings/server.conf";
 	
@@ -80,6 +88,8 @@ public class RTSPStreamer extends VideoStreamer {
 	Timer updateProcess;
 		
 	public Bot bot;
+	public Format outputFormat;
+	
 	
 	public RTSPStreamer() {
 		super();
@@ -116,6 +126,7 @@ public class RTSPStreamer extends VideoStreamer {
 			size = new Dimension(Integer.parseInt(res[0]), Integer.parseInt(res[1]));
 			port = Integer.parseInt(props.getProperty("port", "10000"));
 			autoStart = Boolean.parseBoolean(props.getProperty("autostart"));
+			outputFormat = Format.PNG;
 			
 			
 		} catch (Exception e) {
@@ -130,19 +141,23 @@ public class RTSPStreamer extends VideoStreamer {
 		baos = new ByteArrayOutputStream();   
 		ios = ImageIO.createImageOutputStream(baos);
 		
-		if (false) { //PNG
-			imageWriter = ImageIO.getImageWritersByFormatName("PNG").next();
-			writerParams = imageWriter.getDefaultWriteParam();;
-		} else { //JPG
-			
-			imageWriter = ImageIO.getImageWritersByFormatName("JPG").next();
-			JPEGImageWriteParam jpegParams = (JPEGImageWriteParam) imageWriter.getDefaultWriteParam();
-			jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-			jpegParams.setCompressionQuality(.4f);
-			
-			writerParams = jpegParams;
+		switch (outputFormat) {
+			case PNG:
+				imageWriter = ImageIO.getImageWritersByFormatName("PNG").next();
+				writerParams = imageWriter.getDefaultWriteParam();
+				break;
+				
+			case JPG:
+				imageWriter = ImageIO.getImageWritersByFormatName("JPG").next();
+				JPEGImageWriteParam jpegParams = (JPEGImageWriteParam) imageWriter.getDefaultWriteParam();
+				jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+				jpegParams.setCompressionQuality(.4f);
+				
+				writerParams = jpegParams;
+				break;
 		}
 		
+	
 		
 		imageWriter.setOutput(ios);			
 		
@@ -308,7 +323,7 @@ public class RTSPStreamer extends VideoStreamer {
 			
 	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer);
 	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
-	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, "image/png");
+	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, outputFormat.contentType);
 	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.length);
 	        
 			ctx.writeAndFlush(httpResponse);

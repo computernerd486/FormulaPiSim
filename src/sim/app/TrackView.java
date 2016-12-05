@@ -45,6 +45,7 @@ import sim.app.panel.VideoSettings;
 import sim.object.*;
 import sim.util.*;
 import sim.util.io.stream.*;
+import sim.util.io.stream.RTSPStreamer.Format;
 
 /**
  * TrackView
@@ -294,10 +295,10 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		GL2 gl2 = glautodrawable.getGL().getGL2();
 		gl2.glLineWidth(2);		
 		gl2.glEnable(GL2.GL_SCISSOR_TEST);
-		
-		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+				
+		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);		
 		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
-		
+
 		//Draw the overhead view
 		{
 			gl2.glViewport(glcanvas.getWidth() - view_width_overhead, 0, view_width_overhead, view_height_overhead);
@@ -333,6 +334,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			glu.gluPerspective( 55, (float)view_width_firstperson/(float)view_height_firstperson, 1f, 2000.0f );
 			
+			
 			glu.gluLookAt(
 					bot.camera.x, bot.camera.y, bot.camera.z, 
 					bot.focus.x, bot.focus.y, bot.focus.z, 
@@ -340,8 +342,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			/*
 			glu.gluLookAt(
-					bot.position.x, bot.position.y, bot.height + 40, 
-					bot.position.x - 40, bot.position.y, bot.height, 
+					bot.position.x + 20, bot.position.y, bot.height + 10, 
+					bot.position.x, bot.position.y, bot.height, 
 					0d, 0d, 1d);
 			*/
 			
@@ -567,7 +569,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private void drawBot3D(GLAutoDrawable glautodrawable, Bot bot)
 	{
-		//botModel.draw(glautodrawable, bot, null);
+		botModel.draw(glautodrawable, bot, null);
 		
 		for (int i = 0; i < aiBots.length; i++) {
 			if (((AIBotUpdater)aiUpdaters[i]).lane != userLane)
@@ -729,6 +731,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 					vs.resX.setEnabled(false);
 					vs.resY.setEnabled(false);
 					vs.port.setEnabled(false);
+					vs.formatJPG.setEnabled(false);
+					vs.formatPNG.setEnabled(false);
 					vs.runningStatus.setText("Running");
 
 					((RTSPStreamer)videoStream).setupRTSPStreamer(new Dimension(x, y), port);
@@ -750,6 +754,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				vs.resX.setEnabled(true);
 				vs.resY.setEnabled(true);
 				vs.port.setEnabled(true);
+				vs.formatJPG.setEnabled(true);
+				vs.formatPNG.setEnabled(true);
 				vs.runningStatus.setText("Stopped");
 				videoStream.stop();
 			}
@@ -760,6 +766,24 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				isFlipped = vs.flipVideo.isSelected();
+			}
+		});
+		
+		vs.formatJPG.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RTSPStreamer streamer = (RTSPStreamer)videoStream;
+				streamer.outputFormat = Format.JPG;
+			}
+		});
+		
+		vs.formatPNG.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RTSPStreamer streamer = (RTSPStreamer)videoStream;
+				streamer.outputFormat = Format.PNG;
 			}
 		});
 		

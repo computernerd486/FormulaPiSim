@@ -9,10 +9,12 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
@@ -41,6 +43,8 @@ public class VideoSettings extends JPanel {
 	public JCheckBox flipVideo;
 	public JSlider lightness;
 	
+	public JRadioButton formatPNG;
+	public JRadioButton formatJPG;
 	
 	public VideoSettings() {	
 
@@ -116,14 +120,37 @@ public class VideoSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, flipVideo, -10, SpringLayout.EAST, settings);
 		settings.add(flipVideo);
 		
+		JPanel outputPanel = new JPanel();
+		springLayout.putConstraint(SpringLayout.NORTH, outputPanel, 6, SpringLayout.SOUTH, flipVideo);
+		springLayout.putConstraint(SpringLayout.WEST, outputPanel, 10, SpringLayout.WEST, settings);
+		springLayout.putConstraint(SpringLayout.EAST, outputPanel, -10, SpringLayout.EAST, settings);
+		settings.add(outputPanel);
+		outputPanel.setLayout(new GridLayout(0, 2, 10, 0));
+		
+		formatPNG = new JRadioButton("PNG");
+		formatPNG.setActionCommand("PNG");
+		formatPNG.setSelected(true);
+		outputPanel.add(formatPNG);
+		
+		formatJPG = new JRadioButton("JPG");
+		formatJPG.setActionCommand("JPG");
+		formatJPG.setSelected(false);
+		outputPanel.add(formatJPG);
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(formatPNG);
+		group.add(formatJPG);
+		
+		/**
 		lightness = new JSlider(-5, 5, 0);
 		springLayout.putConstraint(SpringLayout.NORTH, lightness, 6, SpringLayout.SOUTH, flipVideo);
 		springLayout.putConstraint(SpringLayout.WEST, lightness, 10, SpringLayout.WEST, settings);
 		springLayout.putConstraint(SpringLayout.EAST, lightness, -10, SpringLayout.EAST, settings);
 		settings.add(lightness);
-				
+		*/
+			
 		JPanel panel = new JPanel();
-		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.SOUTH, lightness);
+		springLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.SOUTH, outputPanel);
 		springLayout.putConstraint(SpringLayout.WEST, panel, 10, SpringLayout.WEST, settings);
 		springLayout.putConstraint(SpringLayout.EAST, panel, -10, SpringLayout.EAST, settings);
 		settings.add(panel);

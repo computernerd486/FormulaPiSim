@@ -238,8 +238,6 @@ public class BotModel {
 	
 	public void cleanup(GLAutoDrawable glautodrawable) {}
 	
-	//float r = 0;
-	
 	/**
 	 * 
 	 * @param glautodrawable
@@ -248,22 +246,17 @@ public class BotModel {
 	 */
 	public void draw(GLAutoDrawable glautodrawable, Bot bot, Texture lidOverride) {
 		GL2 gl2 = glautodrawable.getGL().getGL2();
-		gl2.glEnable(GL.GL_DEPTH_TEST);
-		gl2.glDepthFunc(GL.GL_LEQUAL);
+		
 		gl2.glEnable(GL2.GL_BLEND);
 		gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl2.glDisable(GL.GL_CULL_FACE);
 		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 		
 		gl2.glPushMatrix();
-		gl2.glTranslatef((float)bot.position.x/* - 40*/, (float)bot.position.y, 0);
+		gl2.glTranslatef((float)bot.position.x, (float)bot.position.y, 0);
 		gl2.glRotatef(bot.direction, 0f, 0f, 1f);
-		//r += .25f;
-		//gl2.glRotatef(r, 0f, 0f, 1f);
 		
 		// Chassis
-		gl2.glEnable(GL.GL_DEPTH_TEST);
-		gl2.glDepthFunc(GL.GL_ALWAYS);
 		gl2.glPushMatrix();
 		gl2.glTranslatef(0,0,6f);
 		gl2.glColor3f(.8f, .8f, .85f);
@@ -275,16 +268,12 @@ public class BotModel {
 		//Tyres
 		gl2.glColor3f(0f, 1f, 1f);
 		
-
-		gl2.glEnable(GL.GL_DEPTH_TEST);
-		gl2.glDepthFunc(GL.GL_LEQUAL);
 		for (float[] pos : tyre_offset )
 		{
 			gl2.glPushMatrix();
 			gl2.glTranslatef(pos[0], pos[1], tyre_radius);
 			gl2.glRotatef(pos[2], 0f, 0f, 1f);
 			
-			//gl2.glDisable(GL.GL_CULL_FACE);
 			setTex(gl2, tex_tyre, texCoords_tread);
 			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_tread);
 			gl2.glDrawArrays(GL2.GL_QUAD_STRIP, 0, treadVCount);
@@ -294,8 +283,6 @@ public class BotModel {
 		}
 
 		//baseplate		
-		gl2.glEnable(GL.GL_DEPTH_TEST);
-		gl2.glDepthFunc(GL.GL_LEQUAL);
 		gl2.glColor3f(1f, 0f, 1f);
 		gl2.glPushMatrix();
 		setTex(gl2, (lidOverride == null) ? tex_lid : lidOverride, null);
@@ -319,16 +306,12 @@ public class BotModel {
 
 		//Rims
 		gl2.glColor3f(0f, 1f, 1f);
-		
-		gl2.glEnable(GL.GL_DEPTH_TEST);
-		gl2.glDepthFunc(GL.GL_LEQUAL);
 		for (float[] pos : tyre_offset )
 		{
 			gl2.glPushMatrix();
 			gl2.glTranslatef(pos[0], pos[1], tyre_radius);
 			gl2.glRotatef(pos[2], 0f, 0f, 1f);
 					
-			//gl2.glEnable(GL.GL_CULL_FACE);
 			setTex(gl2, tex_rim, texCoords_rim);
 			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, vertices_rim);
 			gl2.glDrawArrays(GL2.GL_QUADS, 0, 8 * rimSteps);
