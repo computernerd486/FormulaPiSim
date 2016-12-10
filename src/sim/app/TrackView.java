@@ -65,7 +65,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String VERSION = "RELEASE - 1.1.0";
+	private static final String VERSION = "RELEASE - 1.1.1";
 	
 	//OpenGL objects
 	Animator anim;
@@ -102,6 +102,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	public Bot aiBots[];
 	BotUpdater aiUpdaters[];
+	boolean aiEnable = true;
 	
 	//This is for output
 	public BufferedImage botView;
@@ -573,7 +574,8 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	{
 		botModel.draw(glautodrawable, bot, null);
 		
-		for (int i = 0; i < aiBots.length; i++) {
+		
+		for (int i = 0; aiEnable && i < aiBots.length; i++) {
 			if (((AIBotUpdater)aiUpdaters[i]).lane != userLane)
 				botModel.draw(glautodrawable, aiBots[i], null);
 		}
@@ -827,8 +829,9 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				bot.position = new Point2D(start.x, start.y);
 				bot.setDirection( 180f);
 				
-				for (BotUpdater bu : aiUpdaters) {
-					((AIBotUpdater)bu).state = State.INIT;
+				for (AIBotUpdater bu : (AIBotUpdater[])aiUpdaters) {
+					bu.state = State.INIT;
+					bu.targetIndex = 1;
 				}
 				
 				for (int i = 0; i < track.lanes; i++) {
@@ -925,13 +928,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
-		ss.autoAI.addActionListener(new ActionListener() {
+		ss.aiAuto.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ss.autoAI.setEnabled(false);
-				ss.startAI.setEnabled(true);
-				ss.stopAI.setEnabled(true);
+				aiEnable = true;
+				ss.aiOff.setEnabled(true);
+				ss.aiAuto.setEnabled(false);
+				ss.aiStart.setEnabled(true);
+				ss.aiStop.setEnabled(true);
 				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
 					updr.lightStart = true;
 					updr.state = State.INIT;
@@ -939,13 +944,15 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
-		ss.startAI.addActionListener(new ActionListener() {
+		ss.aiStart.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ss.autoAI.setEnabled(true);
-				ss.startAI.setEnabled(false);
-				ss.stopAI.setEnabled(true);
+				aiEnable = true;
+				ss.aiOff.setEnabled(true);
+				ss.aiAuto.setEnabled(true);
+				ss.aiStart.setEnabled(false);
+				ss.aiStop.setEnabled(true);
 				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
 					updr.lightStart = false;
 					updr.state = State.GO;
@@ -953,13 +960,31 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
-		ss.stopAI.addActionListener(new ActionListener() {
+		ss.aiStop.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ss.autoAI.setEnabled(true);
-				ss.startAI.setEnabled(true);
-				ss.stopAI.setEnabled(false);
+				aiEnable = true;
+				ss.aiOff.setEnabled(true);
+				ss.aiAuto.setEnabled(true);
+				ss.aiStart.setEnabled(true);
+				ss.aiStop.setEnabled(false);
+				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
+					updr.lightStart = false;
+					updr.state = State.INIT;
+				}
+			}
+		});
+		
+		ss.aiOff.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				aiEnable = false;
+				ss.aiOff.setEnabled(false);
+				ss.aiAuto.setEnabled(true);
+				ss.aiStart.setEnabled(true);
+				ss.aiStop.setEnabled(true);
 				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
 					updr.lightStart = false;
 					updr.state = State.INIT;

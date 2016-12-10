@@ -18,9 +18,11 @@ public class StartSettings extends JPanel {
 	public JButton lightsRed;
 	public JButton lightsGreen;
 	public JComboBox lane;
-	public JButton startAI;
-	public JButton stopAI;
-	public JButton autoAI;
+	public JButton aiOff;
+	public JButton aiAuto;
+	public JButton aiStart;
+	public JButton aiStop;
+
 	
 	public StartSettings() {
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -86,20 +88,24 @@ public class StartSettings extends JPanel {
 		aiSpringLayout.putConstraint(SpringLayout.EAST, panel, -10, SpringLayout.EAST, aiSettings);
 		aiSettings.add(panel);
 		
-		panel.setLayout(new GridLayout(0, 3, 10, 0));
+		panel.setLayout(new GridLayout(0, 4, 10, 0));
 		
-		autoAI = new JButton("Auto");
-		autoAI.setMargin(new Insets(0, 0, 0, 0));
-		autoAI.setEnabled(false);
-		panel.add(autoAI);
+		aiOff = new JButton("Off");
+		aiOff.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(aiOff);
 		
-		startAI = new JButton("Start");
-		startAI.setMargin(new Insets(0, 0, 0, 0));
-		panel.add(startAI);
+		aiAuto = new JButton("Auto");
+		aiAuto.setMargin(new Insets(0, 0, 0, 0));
+		aiAuto.setEnabled(false);
+		panel.add(aiAuto);
 		
-		stopAI = new JButton("Stop");
-		stopAI.setMargin(new Insets(0, 0, 0, 0));
-		panel.add(stopAI);
+		aiStart = new JButton("Start");
+		aiStart.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(aiStart);
+		
+		aiStop = new JButton("Stop");
+		aiStop.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(aiStop);
 		
 		aiSpringLayout.putConstraint(SpringLayout.SOUTH, aiSettings, 6, SpringLayout.SOUTH, panel);
 	

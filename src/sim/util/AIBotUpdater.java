@@ -64,7 +64,7 @@ public class AIBotUpdater extends BotUpdater {
 	float o_error = 0f;
 	float kp = 0.01f, ki = 0.01f, kd = 0.005f;
 	
-	int targetIndex = 1;
+	public int targetIndex = 1;
 	
 	private void calcMotors() {
 		
@@ -81,7 +81,7 @@ public class AIBotUpdater extends BotUpdater {
 		
 		float e = (float) (Math.atan2(target.y - bot.position.y, target.x - bot.position.x));
 
-		System.out.println(distance_t + " : " + distance_n + " -- " + e);
+		//System.out.println(distance_t + " : " + distance_n + " -- " + e);
 		
 		bot.setDirection((float)Math.toDegrees(e));
 		
