@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 
 import sim.object.Bot;
+import sim.object.IndicatorBar.Status;
 import sim.object.Track;
 
 public class AIBotUpdater extends BotUpdater {
@@ -14,12 +15,16 @@ public class AIBotUpdater extends BotUpdater {
 	
 	protected Track track;
 	public int lane;
+	public State state;
+	public boolean lightStart;
 	
 	public AIBotUpdater(Bot bot, Track track, int lane) {
 		super(bot);
 		
 		this.track = track;
 		this.lane = lane;
+		this.state = State.INIT;
+		this.lightStart = true;
 	}
 	
 	@Override
@@ -31,8 +36,22 @@ public class AIBotUpdater extends BotUpdater {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				calcMotors();
-				bot.move();
+				
+				if (lightStart) {
+					if (state == State.INIT && track.lights.status == Status.GREEN)
+						state = State.STAGE;
+					
+					if (state == State.STAGE && track.lights.status == Status.RED)
+						state = State.READY;
+					
+					if (state == State.READY && track.lights.status == Status.GREEN)
+						state = State.GO;
+				}
+				
+				if (state == State.GO) {
+					calcMotors();
+					bot.move();
+				}
 				
 				timer.restart();
 			}

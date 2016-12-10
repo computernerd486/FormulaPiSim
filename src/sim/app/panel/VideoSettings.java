@@ -162,7 +162,7 @@ public class VideoSettings extends JPanel {
 		server_stop = new JButton("Stop");
 		panel.add(server_stop);
 		
-
+		springLayout.putConstraint(SpringLayout.SOUTH, settings, 6, SpringLayout.SOUTH, panel);
 		
 		this.add(settings);
 		

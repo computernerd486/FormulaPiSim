@@ -149,6 +149,9 @@ public class BotSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, maxRPM, 0, SpringLayout.EAST, panel);
 		settings.add(maxRPM);
 
+		
+		//springLayout.putConstraint(SpringLayout.SOUTH, settings, 6, SpringLayout.SOUTH, maxRPM);
+		
 		container.add(settings);	
 	}
 }

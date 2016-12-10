@@ -2,6 +2,7 @@ package sim.app.panel;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Insets;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -18,6 +19,8 @@ public class StartSettings extends JPanel {
 	public JButton lightsGreen;
 	public JComboBox lane;
 	public JButton startAI;
+	public JButton stopAI;
+	public JButton autoAI;
 	
 	public StartSettings() {
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -63,13 +66,44 @@ public class StartSettings extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, lane, 0, SpringLayout.EAST, lightsOff);
 		settings.add(lane);
 		
-		startAI = new JButton("Start AI");
-		springLayout.putConstraint(SpringLayout.NORTH, startAI, 6, SpringLayout.SOUTH, lblLane);
-		springLayout.putConstraint(SpringLayout.WEST, startAI, 0, SpringLayout.WEST, lightsGreen);
-		springLayout.putConstraint(SpringLayout.EAST, startAI, 0, SpringLayout.EAST, lightsGreen);
-		settings.add(startAI);
+		springLayout.putConstraint(SpringLayout.SOUTH, settings, 6, SpringLayout.SOUTH, lane);
+				
+		container.add(settings);
 		
+		JPanel ai = new JPanel();
+		ai.setBackground(Color.LIGHT_GRAY);
+		ai.add(new JLabel("AI Control", JLabel.CENTER));
+		container.add(ai);
 		
-		this.add(settings);
+		JPanel aiSettings = new JPanel();
+		
+		SpringLayout aiSpringLayout = new SpringLayout();
+		aiSettings.setLayout(aiSpringLayout);
+		
+		JPanel panel = new JPanel();
+		aiSpringLayout.putConstraint(SpringLayout.NORTH, panel, 6, SpringLayout.NORTH, aiSettings);
+		aiSpringLayout.putConstraint(SpringLayout.WEST, panel, 10, SpringLayout.WEST, aiSettings);
+		aiSpringLayout.putConstraint(SpringLayout.EAST, panel, -10, SpringLayout.EAST, aiSettings);
+		aiSettings.add(panel);
+		
+		panel.setLayout(new GridLayout(0, 3, 10, 0));
+		
+		autoAI = new JButton("Auto");
+		autoAI.setMargin(new Insets(0, 0, 0, 0));
+		autoAI.setEnabled(false);
+		panel.add(autoAI);
+		
+		startAI = new JButton("Start");
+		startAI.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(startAI);
+		
+		stopAI = new JButton("Stop");
+		stopAI.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(stopAI);
+		
+		aiSpringLayout.putConstraint(SpringLayout.SOUTH, aiSettings, 6, SpringLayout.SOUTH, panel);
+	
+		container.add(aiSettings);
+		
 	}
 }

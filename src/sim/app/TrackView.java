@@ -44,6 +44,7 @@ import sim.app.panel.StartSettings;
 import sim.app.panel.VideoSettings;
 import sim.object.*;
 import sim.util.*;
+import sim.util.AIBotUpdater.State;
 import sim.util.io.stream.*;
 import sim.util.io.stream.RTSPStreamer.Format;
 
@@ -169,6 +170,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			Point2D sp = track.startPositions[i];
 			aiBots[i] = new Bot(new Point2D(sp.x, sp.y), 180f);
 			aiUpdaters[i] = new AIBotUpdater(aiBots[i], track, i);
+			aiUpdaters[i].start();
 		}
 		
 		bs.accel.setValue(bot.m1.accel_rate);
@@ -711,6 +713,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		
 		bs = new BotSettings();
 		p.add(bs);
+		
 	}
 
 	private void initSettingsControls() {
@@ -825,7 +828,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				bot.setDirection( 180f);
 				
 				for (BotUpdater bu : aiUpdaters) {
-					bu.stop();
+					((AIBotUpdater)bu).state = State.INIT;
 				}
 				
 				for (int i = 0; i < track.lanes; i++) {
@@ -922,12 +925,45 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			}
 		});
 		
+		ss.autoAI.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ss.autoAI.setEnabled(false);
+				ss.startAI.setEnabled(true);
+				ss.stopAI.setEnabled(true);
+				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
+					updr.lightStart = true;
+					updr.state = State.INIT;
+				}
+			}
+		});
+		
 		ss.startAI.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				for (BotUpdater updr : aiUpdaters)
-					if (!updr.isRunning()) updr.start();
+				ss.autoAI.setEnabled(true);
+				ss.startAI.setEnabled(false);
+				ss.stopAI.setEnabled(true);
+				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
+					updr.lightStart = false;
+					updr.state = State.GO;
+				}
+			}
+		});
+		
+		ss.stopAI.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ss.autoAI.setEnabled(true);
+				ss.startAI.setEnabled(true);
+				ss.stopAI.setEnabled(false);
+				for (AIBotUpdater updr : (AIBotUpdater[])aiUpdaters) {
+					updr.lightStart = false;
+					updr.state = State.INIT;
+				}
 			}
 		});
 
