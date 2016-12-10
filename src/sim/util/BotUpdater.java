@@ -17,16 +17,18 @@ public class BotUpdater{
 	protected Bot bot;
 	protected Timer timer;
 	protected LapTimer laptimer;
+	protected boolean running;
 	
 	
 	public BotUpdater(Bot bot){
 		this.bot = bot;
 		this.laptimer = bot.laptimer;
+		running = false;
 	}
 
 	public void start()
 	{
-		
+		running = true;
 		timer = new Timer(20, new ActionListener() {
 			
 			@Override
@@ -45,8 +47,11 @@ public class BotUpdater{
 	public void stop()
 	{
 		timer.stop();
+		running = false;
 	}
 	
-	
+	public boolean isRunning() {
+		return running;
+	}
 	
 }

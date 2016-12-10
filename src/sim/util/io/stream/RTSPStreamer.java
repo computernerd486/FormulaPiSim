@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Calendar;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -320,8 +319,9 @@ public class RTSPStreamer extends VideoStreamer {
 		@Override
 		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 			//long start = Calendar.getInstance().getTimeInMillis();
-			
-	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer);
+
+			httpBuffer.resetReaderIndex();
+	    	FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpBuffer.retain());
 	    	httpResponse.headers().add(HttpHeaderNames.PRAGMA, "no-cache");
 	        httpResponse.headers().add(HttpHeaderNames.CONTENT_TYPE, outputFormat.contentType);
 	        httpResponse.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.length);

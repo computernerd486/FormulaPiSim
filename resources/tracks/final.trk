@@ -2,7 +2,7 @@
 #1 unit here = 1 cm in the real world 
 #Width,Height
 WIDTH:90
-HEIGHT:20
+HEIGHT:15
 BOUNDS:1060,700
 START_LINE:560
 LANES:5

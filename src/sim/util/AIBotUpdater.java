@@ -10,6 +10,8 @@ import sim.object.Track;
 
 public class AIBotUpdater extends BotUpdater {
 
+	public enum State { INIT, STAGE, READY, GO }
+	
 	protected Track track;
 	public int lane;
 	
@@ -23,7 +25,7 @@ public class AIBotUpdater extends BotUpdater {
 	@Override
 	public void start()
 	{
-		
+		running = true;
 		timer = new Timer(20, new ActionListener() {
 			
 			@Override
@@ -52,8 +54,6 @@ public class AIBotUpdater extends BotUpdater {
 		
 		float distance_t = (float) Math.sqrt(Math.pow(target.x - bot.position.x, 2) + Math.pow(target.y - bot.position.y,2));
 		float distance_n = (float) Math.sqrt(Math.pow(next.x - bot.position.x, 2) + Math.pow(next.y - bot.position.y,2));
-		
-		
 		
 		if (distance_t < 10) {
 			target = next;

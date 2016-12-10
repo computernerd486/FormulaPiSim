@@ -64,7 +64,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String VERSION = "RELEASE - 1.0.2";
+	private static final String VERSION = "RELEASE - 1.1.0";
 	
 	//OpenGL objects
 	Animator anim;
@@ -157,7 +157,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		//TrackNode start = track.nodes[0];
 		userLane = Math.round(track.lanes / 2);
 		Point2D start = track.startPositions[userLane];
-		bot = new Bot(new Point2D(start.x + 8, start.y), 180f); //TODO: Set bot offset from half width.
+		bot = new Bot(new Point2D(start.x, start.y), 180f); //TODO: Set bot offset from half width.
 		bot.laptimer = new LapTimer(track, bot);
 		
 		botModel = new BotModel();
@@ -167,7 +167,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 		aiUpdaters = new AIBotUpdater[track.lanes];
 		for (int i = 0; i < track.lanes; i++) {
 			Point2D sp = track.startPositions[i];
-			aiBots[i] = new Bot(new Point2D(sp.x + 8, sp.y), 180f);
+			aiBots[i] = new Bot(new Point2D(sp.x, sp.y), 180f);
 			aiUpdaters[i] = new AIBotUpdater(aiBots[i], track, i);
 		}
 		
@@ -823,6 +823,16 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 				bot.m2.spd_sig = 0f;
 				bot.position = new Point2D(start.x, start.y);
 				bot.setDirection( 180f);
+				
+				for (BotUpdater bu : aiUpdaters) {
+					bu.stop();
+				}
+				
+				for (int i = 0; i < track.lanes; i++) {
+					Point2D sp = track.startPositions[i];
+					aiBots[i].position = new Point2D(sp.x, sp.y);
+					aiBots[i].direction = 180f;
+				}
 
 			}
 		});
@@ -917,7 +927,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				for (BotUpdater updr : aiUpdaters)
-					updr.start();
+					if (!updr.isRunning()) updr.start();
 			}
 		});
 
