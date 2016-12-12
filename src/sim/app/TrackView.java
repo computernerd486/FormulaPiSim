@@ -770,7 +770,7 @@ public class TrackView extends JFrame implements WindowListener, GLEventListener
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				isFlipped = vs.flipVideo.isSelected();
+				bot.isFlipped = isFlipped = vs.flipVideo.isSelected();
 			}
 		});
 		

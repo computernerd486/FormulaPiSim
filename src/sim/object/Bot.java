@@ -58,6 +58,7 @@ public class Bot {
 	
 	public Motor m1, m2;
 	public boolean light;
+	public boolean isFlipped;
 	
 	public LapTracker tracker;
 	public LapTimer laptimer;
@@ -81,6 +82,7 @@ public class Bot {
 		this.p_m1 = 0f;
 		this.p_m2 = 0f;
 		this.light = false;
+		this.isFlipped = false;
 		
 		m1 = new Motor();
 		m2 = new Motor();
@@ -182,8 +184,13 @@ public class Bot {
 		
 		float angle = (float) Math.toRadians(direction);
 		angle += (velocityR - velocityL) / (bot_radius * 2);
-		position.x += (0.5 * (velocityR + velocityL)) * Math.cos(angle);
-		position.y += (0.5 * (velocityR + velocityL)) * Math.sin(angle);
+		if (isFlipped) {
+			position.x -= (0.5 * (velocityR + velocityL)) * Math.cos(angle);
+			position.y -= (0.5 * (velocityR + velocityL)) * Math.sin(angle);
+		} else {
+			position.x += (0.5 * (velocityR + velocityL)) * Math.cos(angle);
+			position.y += (0.5 * (velocityR + velocityL)) * Math.sin(angle);
+		}
 		//System.out.println(velocityL + " : " + velocityR);
 		//System.out.println(angle + " : [" + position.x + "," + position.y + "]");
 		
