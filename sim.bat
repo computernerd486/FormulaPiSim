@@ -1,0 +1,1 @@
+java -classpath "lib/FormulaPiSim-1.2-SNAPSHOT.jar;lib/jogl-all-2.3.2.jar;lib/gluegen-2.3.2.jar;lib/gluegen-rt-2.3.2.jar;lib/gluegen-rt-main-2.3.2.jar;lib/gluegen-rt-2.3.2-natives-windows-amd64.jar;lib/gluegen-rt-2.3.2-natives-windows-i586.jar;lib/netty-all-4.1.32.Final.jar;lib/jmf-2.1.1e.jar" sim.app.TrackView
