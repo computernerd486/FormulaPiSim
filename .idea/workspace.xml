@@ -7,52 +7,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="943c2465-ac61-484b-a64e-deeb3e94bb43" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assembly/assembly.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_lid.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_lid_template.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_rim.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_rim_inner.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/bot_tyre.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/design_track.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/design_track_color.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/lightbar_hard.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/lightbar_soft.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/track.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/track_v2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/img/track_v3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/settings/bot.conf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/settings/server.conf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tracks/default.trk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/tracks/final.trk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MathTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/PanelTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SimpleATan.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/BotView.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/Simulation.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/TrackDesigner.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/TrackView.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/panel/BotSettings.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/panel/StartSettings.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/panel/VideoSettings.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/app/panel/ViewPort.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/Bot.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/BotModel.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/IndicatorBar.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/LapTimer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/LapTracker.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/Motor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/Track.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/object/TrackNode.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/AIBotUpdater.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/BotUpdater.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/Point2D.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/Point3D.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/io/stream/JMFRTPStreamer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/io/stream/RTSPStreamer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/io/stream/StaticImageStreamer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sim/util/io/stream/VideoStreamer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -67,8 +23,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="54" selection-start-line="54" selection-end-line="54" />
+            <state relative-caret-position="323">
+              <caret line="118" selection-start-line="118" selection-end-line="118" />
             </state>
           </provider>
         </entry>
@@ -112,17 +68,62 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/sim/app/TrackView.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="145" column="42" lean-forward="true" selection-start-line="145" selection-start-column="42" selection-end-line="145" selection-end-column="42" />
+            <state relative-caret-position="374">
+              <caret line="67" column="58" selection-start-line="67" selection-start-column="53" selection-end-line="67" selection-end-column="58" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
                 <element signature="imports" expanded="true" />
                 <element signature="e#23432#23433#0" expanded="true" />
                 <element signature="e#23496#23497#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="204">
+                <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/StaticImageStreamer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="442">
+              <caret line="45" column="15" selection-start-line="45" selection-start-column="15" selection-end-line="45" selection-end-column="15" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/JMFRTPStreamer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3216">
+              <caret line="41" column="13" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/VideoStreamer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-116">
+              <caret line="11" column="22" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -145,6 +146,7 @@
         <option value="$PROJECT_DIR$/src/assembly/assembly.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/sim/app/TrackView.java" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -172,9 +174,10 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="228" />
-    <option name="width" value="1613" />
-    <option name="height" value="1002" />
+    <option name="x" value="294" />
+    <option name="y" value="31" />
+    <option name="width" value="1546" />
+    <option name="height" value="996" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -190,48 +193,6 @@
               <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
               <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="sim" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="sim" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FormulaPiSim" type="b2602c69:ProjectViewProjectNode" />
-              <item name="FormulaPiSim" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -241,7 +202,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545841336858" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545880817701" />
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -308,17 +269,18 @@
       <option name="presentableId" value="Default" />
       <updated>1545021912482</updated>
       <workItem from="1545021916844" duration="32228000" />
-      <workItem from="1545710497185" duration="5611000" />
+      <workItem from="1545710497185" duration="12543000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37839000" />
+    <option name="totallyTimeSpent" value="44771000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17857143" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17857143" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -327,7 +289,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32949308" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32655245" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.18415418" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -407,13 +369,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/JMFRTPStreamer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="18" selection-start-line="10" selection-start-column="18" selection-end-line="10" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/lang/Thread.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="437">
@@ -482,23 +437,69 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="54" selection-start-line="54" selection-end-line="54" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/screenshots/3DView.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/screenshots/3DView_2.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/screenshots/AITest.png">
+      <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/sim/app/TrackView.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="145" column="42" lean-forward="true" selection-start-line="145" selection-start-column="42" selection-end-line="145" selection-end-column="42" />
+        <state relative-caret-position="374">
+          <caret line="67" column="58" selection-start-line="67" selection-start-column="53" selection-end-line="67" selection-end-column="58" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
             <element signature="imports" expanded="true" />
             <element signature="e#23432#23433#0" expanded="true" />
             <element signature="e#23496#23497#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/VideoStreamer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-116">
+          <caret line="11" column="22" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/JMFRTPStreamer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3216">
+          <caret line="41" column="13" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/sim/util/io/stream/StaticImageStreamer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="45" column="15" selection-start-line="45" selection-start-column="15" selection-end-line="45" selection-end-column="15" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="118" selection-start-line="118" selection-end-line="118" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="204">
+            <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
